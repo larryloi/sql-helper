@@ -32,4 +32,4 @@ services:
       delivered: 10
       others: 12
     NUM_PROCESSES: 1
-    RETENTION_HOUR: 2160
+    RETENTION_HOUR: 72
