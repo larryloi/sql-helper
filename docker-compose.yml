@@ -1,0 +1,46 @@
+version: '3.8'
+services:
+  mssql-invoices-creator:
+    image: quay.io/larryloi/sql_helper-sameple_data:0.4.0
+    build: .
+    hostname: mssql-invoices-creator01
+    volumes:
+      - ./mssql_inventory/config.yml:/app/config.yml
+      - ./mssql_inventory/:/app/mssql_inventory/
+    command: ["python", "-u", "mssql_inventory/invoices_creator.py"]
+
+  mssql-invoices-modifier:
+    image: quay.io/larryloi/sql_helper-sameple_data:0.4.0
+    build: .
+    hostname: mssql-invoices-modifier01
+    volumes:
+      - ./mssql_inventory/config.yml:/app/config.yml
+      - ./mssql_inventory/:/app/mssql_inventory/
+    command: ["python", "-u", "mssql_inventory/invoices_modifier.py"]
+
+  mssql-orders-creator:
+    image: quay.io/larryloi/sql_helper-sameple_data:0.4.0
+    build: .
+    hostname: mssql-orders-creator01
+    volumes:
+      - ./mssql_inventory/config.yml:/app/config.yml
+      - ./mssql_inventory/:/app/mssql_inventory/
+    command: ["python", "-u", "mssql_inventory/orders_creator.py"]
+
+  mssql-orders-demo00-creator:
+    image: quay.io/larryloi/sql_helper-sameple_data:0.4.0
+    build: .
+    hostname: mssql-orders-demo00-creator01
+    volumes:
+      - ./mssql_inventory/config.yml:/app/config.yml
+      - ./mssql_inventory/:/app/mssql_inventory/
+    command: ["python", "-u", "mssql_inventory/orders_demo00_creator.py"]
+  
+  mysql-suppliers-creator:
+    image: quay.io/larryloi/sql_helper-sameple_data:0.4.0
+    build: .
+    hostname: mysql-suppliers-creator
+    volumes:
+      - ./mysql_orders/config.yml:/app/config.yml
+      - ./mssql_inventory/:/app/mssql_inventory/
+    command: ["python", "-u", "mysql_orders/supplier_creator.py"]
