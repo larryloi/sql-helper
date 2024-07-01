@@ -40,7 +40,8 @@ def create_fake_data(fake, type_info):
 
     fake_value = eval(method)
 
-    spec = {"type": type_name, "spec": json.dumps(fake_value)}
+    #spec = {"type": type_name, "spec": json.dumps(fake_value)}
+    spec = {"type": type_name, "spec": fake_value}
     return spec
 
 def insert_data():

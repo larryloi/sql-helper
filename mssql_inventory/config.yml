@@ -23,7 +23,7 @@ services:
     RETENTION_HOUR: 72
   orders_demo00_creator:
     DATABASE_URL: mssql+pyodbc://SVC_DS_HELPER:Abcd1234@rdb1.kaskade.local:1433/inventory?driver=ODBC+Driver+17+for+SQL+Server
-    WAIT_TIME: [30, 60]
+    WAIT_TIME: [30,60]
     TYPE: [{"name":"vehicle", "provider":"VehicleProvider", "method":"fake.vehicle_object()"},{"name":"music","provider":"MusicProvider","method":"fake.music_genre_object()"}]
     STATUS:
       created: 50
