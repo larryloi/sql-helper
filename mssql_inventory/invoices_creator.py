@@ -21,6 +21,7 @@ service_config = config['services']['invoices_creator']
 wait_time = service_config['WAIT_TIME']
 class_ = service_config['CLASS']
 num_processes = service_config['NUM_PROCESSES']
+retention_hours = service_config['RETENTION_HOURS']
 
 def insert_data():
     engine = create_engine(service_config['DATABASE_URL'])
@@ -46,9 +47,10 @@ def insert_data():
                 })
                 connection.execute(insert_stmt)
 
-                retention_hours = service_config['RETENTION_HOUR']
-                delete_stmt = invoices.delete().where(text("DATEDIFF(hour, created_at, GETDATE()) > {retention_hours}"))
+
+                delete_stmt = invoices.delete().where(text(f"DATEDIFF(hour, updated_at, GETDATE()) > {retention_hours}"))
                 connection.execute(delete_stmt)
+                #print (f"{delete_stmt}")
             except sqlalchemy.exc.ProgrammingError:
                 continue
 

@@ -21,6 +21,8 @@ service_config = config['services']['orders_creator']
 wait_time = service_config['WAIT_TIME']
 status = service_config['STATUS']
 num_processes = service_config['NUM_PROCESSES']
+retention_hours = service_config['RETENTION_HOURS']
+
 
 def insert_data():
     engine = create_engine(service_config['DATABASE_URL'])
@@ -30,6 +32,7 @@ def insert_data():
     while True:
         wait_time_seconds = random.randint(wait_time[0], wait_time[1])
         time.sleep(wait_time_seconds)
+
 
         with engine.connect() as connection:
             try:
@@ -48,8 +51,10 @@ def insert_data():
                 })
                 connection.execute(insert_stmt)
                 
-                retention_hours = service_config['RETENTION_HOUR']
-                delete_stmt = orders.delete().where(text("DATEDIFF(hour, created_at, GETDATE()) > {retention_hours}"))
+                # print (f"Retention hours: {retention_hours}....")
+                delete_stmt = orders.delete().where(text(f"DATEDIFF(hour, updated_at, GETDATE()) > {retention_hours}"))
+                # print (f"Executing... Statment")
+                # print (f"{delete_stmt}")
                 connection.execute(delete_stmt)
             except sqlalchemy.exc.ProgrammingError:
                 continue

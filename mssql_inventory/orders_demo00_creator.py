@@ -29,6 +29,7 @@ status = service_config['STATUS']
 num_processes = service_config['NUM_PROCESSES']
 # tmpl_spec = service_config['TMPL_SPEC']
 types = service_config['TYPE']
+retention_hours = service_config['RETENTION_HOURS']
 
 
 def create_fake_data(fake, type_info):
@@ -89,8 +90,7 @@ def insert_data():
 
                 connection.execute(insert_stmt)
 
-                retention_hours = service_config['RETENTION_HOUR']
-                delete_stmt = orders_demo00.delete().where(text("DATEDIFF(hour, created_at, GETDATE()) > {retention_hours}"))
+                delete_stmt = orders_demo00.delete().where(text(f"DATEDIFF(hour, updated_at, GETDATE()) > {retention_hours}"))
                 connection.execute(delete_stmt)
             except sqlalchemy.exc.ProgrammingError:
                 continue
