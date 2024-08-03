@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   mssql_invoices_creator:
-    image: quay.io/larryloi/sql_helper-sameple_data:0.4.2
+    image: quay.io/larryloi/sql_helper-fake_data:0.5.0
     build: .
     hostname: mssql-invoices-creator01
     dns:
@@ -12,7 +12,7 @@ services:
     command: ["python", "-u", "mssql_inventory/invoices_creator.py"]
 
   mssql_invoices_modifier:
-    image: quay.io/larryloi/sql_helper-sameple_data:0.4.2
+    image: quay.io/larryloi/sql_helper-fake_data:0.5.0
     build: .
     hostname: mssql-invoices-modifier01
     dns:
@@ -23,7 +23,7 @@ services:
     command: ["python", "-u", "mssql_inventory/invoices_modifier.py"]
 
   mssql_orders_creator:
-    image: quay.io/larryloi/sql_helper-sameple_data:0.4.2
+    image: quay.io/larryloi/sql_helper-fake_data:0.5.0
     build: .
     hostname: mssql-orders-creator01
     dns:
@@ -34,7 +34,7 @@ services:
     command: ["python", "-u", "mssql_inventory/orders_creator.py"]
 
   mssql_orders_demo00_creator:
-    image: quay.io/larryloi/sql_helper-sameple_data:0.4.2
+    image: quay.io/larryloi/sql_helper-fake_data:0.5.0
     build: .
     hostname: mssql-orders-demo00-creator01
     dns:
@@ -45,12 +45,24 @@ services:
     command: ["python", "-u", "mssql_inventory/orders_demo00_creator.py"]
   
   mysql_suppliers_creator:
-    image: quay.io/larryloi/sql_helper-sameple_data:0.4.2
+    image: quay.io/larryloi/sql_helper-fake_data:0.5.0
     build: .
     hostname: mysql-suppliers-creator
     dns:
       - 192.168.50.199
     volumes:
-      - ./mysql_orders/config.yml:/app/config.yml
-      - ./mssql_inventory/:/app/mssql_inventory/
-    command: ["python", "-u", "mysql_orders/supplier_creator.py"]
+      - ./mysql_inventory/config.yml:/app/config.yml
+      - ./mysql_inventory/:/app/mysql_inventory/
+    command: ["python", "-u", "mysql_inventory/supplier_creator.py"]
+
+
+  mysql_orders_creator:
+    image: quay.io/larryloi/sql_helper-fake_data:0.5.0
+    build: .
+    hostname: mysql-orders-creator
+    dns:
+      - 192.168.50.199
+    volumes:
+      - ./mysql_inventory/config.yml:/app/config.yml
+      - ./mysql_inventory/:/app/mysql_inventory/
+    command: ["python", "-u", "mysql_inventory/my_orders_creator.py"]
