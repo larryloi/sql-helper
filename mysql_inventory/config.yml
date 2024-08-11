@@ -8,8 +8,8 @@ services:
     RETENTION_HOUR: 2160
   my_orders_creator:
     DATABASE_URL: mysql+pymysql://SVC_DS_HELPER:Abcd1234@rdb1.kaskade.local:3306/inventory
-    NUM_PROCESSES: 1
-    WAIT_TIME: [15,30]
+    NUM_PROCESSES: 10
+    WAIT_TIME: [5,20]
     TYPE: [{"name":"vehicle", "provider":"VehicleProvider", "method":"fake.vehicle_object()"},{"name":"music","provider":"MusicProvider","method":"fake.music_genre_object()"}]
     STATUS:
       created: 50
@@ -18,3 +18,12 @@ services:
       delivered: 10
       others: 12
     RETENTION_HOURS: 240
+  my_orders_modifier:
+    DATABASE_URL: mysql+pymysql://SVC_DS_HELPER:Abcd1234@rdb1.kaskade.local:3306/inventory
+    NUM_PROCESSES: 10
+    WAIT_TIME: [5,20]
+    STATUS:
+      cancelled: 8
+      shipped: 12
+      delivered: 40
+      completed: 40

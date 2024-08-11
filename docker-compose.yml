@@ -66,3 +66,14 @@ services:
       - ./mysql_inventory/config.yml:/app/config.yml
       - ./mysql_inventory/:/app/mysql_inventory/
     command: ["python", "-u", "mysql_inventory/my_orders_creator.py"]
+
+  mysql_orders_modifier:
+    image: quay.io/larryloi/sql_helper-fake_data:0.5.0
+    build: .
+    hostname: mysql-orders-modifier
+    dns:
+      - 192.168.50.199
+    volumes:
+      - ./mysql_inventory/config.yml:/app/config.yml
+      - ./mysql_inventory/:/app/mysql_inventory/
+    command: ["python", "-u", "mysql_inventory/my_orders_modifier.py"]

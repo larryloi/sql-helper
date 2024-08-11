@@ -27,7 +27,7 @@ CREATE TABLE my_orders (
     tax_rate FLOAT NOT NULL,
     issued_at DATETIME NOT NULL,
     completed_at DATETIME NULL,
-    spec VARCHAR(1024) NULL,
+    spec json DEFAULT NULL,
     created_at DATETIME NULL,
     updated_at DATETIME NULL,
     PRIMARY KEY (id)
@@ -38,3 +38,4 @@ CREATE UNIQUE INDEX IDX_my_orders_order_id ON my_orders (order_id);
 CREATE INDEX IDX_my_orders_completed_at ON my_orders (completed_at);
 CREATE INDEX IDX_my_orders_created_at ON my_orders (created_at);
 CREATE INDEX IDX_my_orders_updated_at ON my_orders (updated_at);
+

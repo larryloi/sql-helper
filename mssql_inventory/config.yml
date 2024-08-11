@@ -1,19 +1,19 @@
 services:
   invoices_creator:
     DATABASE_URL: mssql+pyodbc://SVC_DS_HELPER:Abcd1234@rdb1.kaskade.local:1433/inventory?driver=ODBC+Driver+17+for+SQL+Server
-    NUM_PROCESSES: 1
-    WAIT_TIME: [15,30]
+    NUM_PROCESSES: 10
+    WAIT_TIME: [5,20]
     CLASS: ABCDEFG
     RETENTION_HOURS: 240
   invoices_modifier:
     DATABASE_URL: mssql+pyodbc://SVC_DS_HELPER:Abcd1234@rdb1.kaskade.local:1433/inventory?driver=ODBC+Driver+17+for+SQL+Server
-    NUM_PROCESSES: 1
-    WAIT_TIME: [15,30]
+    NUM_PROCESSES: 10
+    WAIT_TIME: [5,20]
     CLASS: STUVWX
   orders_creator:
     DATABASE_URL: mssql+pyodbc://SVC_DS_HELPER:Abcd1234@rdb1.kaskade.local:1433/inventory?driver=ODBC+Driver+17+for+SQL+Server
-    NUM_PROCESSES: 1
-    WAIT_TIME: [15,30]
+    NUM_PROCESSES: 10
+    WAIT_TIME: [5,20]
     STATUS:
       created: 50
       pending: 8
@@ -23,8 +23,8 @@ services:
     RETENTION_HOURS: 240
   orders_demo00_creator:
     DATABASE_URL: mssql+pyodbc://SVC_DS_HELPER:Abcd1234@rdb1.kaskade.local:1433/inventory?driver=ODBC+Driver+17+for+SQL+Server
-    NUM_PROCESSES: 1
-    WAIT_TIME: [15,30]
+    NUM_PROCESSES: 10
+    WAIT_TIME: [5,20]
     TYPE: [{"name":"vehicle", "provider":"VehicleProvider", "method":"fake.vehicle_object()"},{"name":"music","provider":"MusicProvider","method":"fake.music_genre_object()"}]
     STATUS:
       created: 50
