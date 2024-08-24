@@ -15,6 +15,14 @@ from faker import Faker
 from faker import Factory as FakerFactory
 from faker_vehicle import VehicleProvider
 from faker_music import MusicProvider
+import logging
+
+logging.basicConfig(
+  format="[%(asctime)s] %(levelname)s: %(message)s",
+  style="%",
+  datefmt="%Y-%m-%d %H:%M:%S",
+  level=logging.INFO,
+)
 
 local_tz = pytz.timezone('Asia/Macau')
 
@@ -31,6 +39,9 @@ num_processes = service_config['NUM_PROCESSES']
 # types = service_config['TYPE']
 # retention_hours = service_config['RETENTION_HOURS']
 
+# Randomly define a datetime within the last
+rand_last_hours = service_config['RAND_LAST_HOURS']
+
 
 def modify_data():
     engine = create_engine(db_url)
@@ -44,24 +55,16 @@ def modify_data():
         wait_time_seconds = random.randint(wait_time[0], wait_time[1])
         time.sleep(wait_time_seconds)
 
-        # type_info = random.choice(types)
-        # fake = Faker()
-        # spec = create_fake_data(fake, type_info)
-#        print (f"{spec}")
-#         print(type(spec)) 
-#         print(f"----")
-#        a = json.dumps(spec)
-#        print(type(a))
-#        print(f"----{a}")
-#        with engine.connect() as connection:
-#            total_records = connection.execute(select([func.count()]).select_from(orders)).scalar()
-#            print(f"Total records: {total_records}")
+
 
         with engine.connect() as connection:
             try:
                 random_status = random.choices(list(status.keys()), weights=list(status.values()))[0]
                 # Randomly define a datetime within the last 3 days
-                random_time = datetime.now(local_tz) - timedelta(days=random.random() * 3)
+                #random_time = datetime.now(local_tz) - timedelta(days=random.random() * 3)
+                
+                # Randomly define a datetime within the last 72 hours (3 days * 24 hours)
+                random_time = datetime.now(local_tz) - timedelta(hours=random.random() * rand_last_hours)
                 
                 # Select the first record after the random tim
                 select_stmt = select(my_orders).where(my_orders.c.created_at >= random_time).order_by(my_orders.c.id).limit(1)
@@ -74,8 +77,10 @@ def modify_data():
                     "status": random_status,
                     "updated_at": datetime.now(local_tz)
                   })
-                  current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                  print(f"[{current_time}] INFO: Update statement: {update_stmt.compile().string} with parameters {update_stmt.compile().params}")
+
+                  logging.info(f"Random time for modifier: {random_time}")
+                  logging.info(f"{update_stmt.compile().string} with parameters {update_stmt.compile().params}")
+                  
                   connection.execute(update_stmt)
             except sqlalchemy.exc.ProgrammingError:
                 pass

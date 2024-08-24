@@ -15,6 +15,14 @@ from faker import Faker
 from faker import Factory as FakerFactory
 from faker_vehicle import VehicleProvider
 from faker_music import MusicProvider
+import logging
+
+logging.basicConfig(
+  format="[%(asctime)s] %(levelname)s: %(message)s",
+  style="%",
+  datefmt="%Y-%m-%d %H:%M:%S",
+  level=logging.INFO,
+)
 
 local_tz = pytz.timezone('Asia/Macau')
 
@@ -88,10 +96,9 @@ def insert_data():
                     "updated_at": datetime.now(local_tz)
                 })
 
-                connection.execute(insert_stmt)
+                result = connection.execute(insert_stmt)
+                logging.info(f"Inserted: {result.inserted_primary_key}")
 
-                delete_stmt = orders_demo00.delete().where(text(f"DATEDIFF(hour, updated_at, GETDATE()) > {retention_hours}"))
-                connection.execute(delete_stmt)
             except sqlalchemy.exc.ProgrammingError:
                 continue
 

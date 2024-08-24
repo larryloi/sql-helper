@@ -8,6 +8,7 @@ RUN apt-get update && \
     ACCEPT_EULA=Y apt-get install -y --no-install-recommends msodbcsql17
 WORKDIR /app
 COPY ./requirements.txt /app
+RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt -v
 
 
