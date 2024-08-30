@@ -1,4 +1,5 @@
 import os
+import sys
 import random
 import time
 import uuid
@@ -17,12 +18,8 @@ from faker_vehicle import VehicleProvider
 from faker_music import MusicProvider
 import logging
 
-logging.basicConfig(
-  format="[%(asctime)s] %(levelname)s: %(message)s",
-  style="%",
-  datefmt="%Y-%m-%d %H:%M:%S",
-  level=logging.INFO,
-)
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'common')))
+import my_logging 
 
 local_tz = pytz.timezone('Asia/Macau')
 
@@ -91,6 +88,7 @@ if __name__ == "__main__":
     for _ in range(num_processes):
         p = Process(target=modify_data)
         p.start()
+        logging.info(f"Process started with PID: {p.pid}")
         processes.append(p)
 
     for p in processes:

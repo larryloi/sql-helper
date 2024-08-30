@@ -11,4 +11,4 @@ build.app:
 #	docker run --rm -it -v ./$(APP_DB)/config.yml:/app/config.yml -v ./$(APP_DB)/orders_demo00_creator.py:/app/$(APP_DB)/orders_demo00_creator.py $(IMAGE_REPO_ROOT)/$(PROJECT_NAME)-$(APP_NAME):$(APP_VER) /bin/bash
 
 run:
-	docker run --rm -it -v ./$(APP_DB)/config.yml:/app/config.yml -v ./$(APP_DB)/$(APP_TBL).py:/app/$(APP_DB)/$(APP_TBL).py $(IMAGE_REPO_ROOT)/$(PROJECT_NAME)-$(APP_NAME):$(APP_VER) /bin/bash
+	docker run --rm -it -v ./common/:/app/common/ -v ./$(APP_DB)/config.yml:/app/config.yml -v ./$(APP_DB)/$(APP_TBL).py:/app/$(APP_DB)/$(APP_TBL).py $(IMAGE_REPO_ROOT)/$(PROJECT_NAME)-$(APP_NAME):$(APP_VER) /bin/bash

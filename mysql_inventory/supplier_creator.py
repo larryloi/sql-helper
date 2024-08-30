@@ -1,3 +1,5 @@
+import os
+import sys
 import random
 import time
 import yaml
@@ -7,6 +9,10 @@ from faker import Faker
 from sqlalchemy import create_engine, Table, MetaData
 from multiprocessing import Process
 import mysql.connector
+import logging
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'common')))
+import my_logging 
 
 local_tz = pytz.timezone('Asia/Macau')
 fake = Faker()
@@ -71,6 +77,7 @@ if __name__ == "__main__":
     for _ in range(num_processes):
         p = Process(target=insert_supplier_data)
         p.start()
+        logging.info(f"Process started with PID: {p.pid}")
         processes.append(p)
 
     for p in processes:

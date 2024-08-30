@@ -1,4 +1,5 @@
 import os
+import sys
 import yaml
 import random
 import time
@@ -9,12 +10,8 @@ from sqlalchemy import create_engine, Table, MetaData, select, func
 from sqlalchemy.sql import text
 import logging
 
-logging.basicConfig(
-  format="[%(asctime)s] %(levelname)s: %(message)s",
-  style="%",
-  datefmt="%Y-%m-%d %H:%M:%S",
-  level=logging.INFO,
-)
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'common')))
+import my_logging 
 
 local_tz = pytz.timezone('Asia/Macau')
 
@@ -29,6 +26,7 @@ retention_hours = service_config['RETENTION_HOURS']
 batch_size = service_config['BATCH_SIZE']
 
 def purge_data():
+    logging.info(f"Process started with PID: {os.getpid()}")
     engine = create_engine(db_url)
     metadata = MetaData()
     table_name = 'my_orders'
@@ -43,7 +41,7 @@ def purge_data():
             try:
                 # Determine the purge range
                 select_stmt = select([my_orders.c.order_id]).where(text(f"TIMESTAMPDIFF(HOUR, updated_at, NOW()) > {retention_hours}")).limit(batch_size)
-                logging.info(f"{select_stmt.compile().string} with parameters {select_stmt.compile().params}")
+                #logging.info(f"{select_stmt.compile().string} with parameters {select_stmt.compile().params}")
                 result = connection.execute(select_stmt)
                 rows_to_delete = result.fetchall()
 
