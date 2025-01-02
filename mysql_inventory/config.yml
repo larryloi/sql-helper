@@ -1,15 +1,15 @@
 services:
   supplier_creator:
-    DATABASE_URL: mysql+pymysql://SVC_DS_HELPER:Abcd1234@rdb1.kaskade.local:3306/inventory
+    DATABASE_URL: mysql+pymysql://sql_helper:Abcd1234@db01.kaskade.local:3306/inventory
     WAIT_TIME: [3600, 7200]
     # WAIT_TIME: [1, 3]
     TYPE: ['music','vehicle']
     NUM_PROCESSES: 1
     RETENTION_HOUR: 2160
   my_orders_creator:
-    DATABASE_URL: mysql+pymysql://SVC_DS_HELPER:Abcd1234@rdb1.kaskade.local:3306/inventory
-    NUM_PROCESSES: 2
-    WAIT_TIME: [5,20]
+    DATABASE_URL: mysql+pymysql://sql_helper:Abcd1234@db01.kaskade.local:3306/inventory
+    NUM_PROCESSES: 12
+    WAIT_TIME: [1,7]
     TYPE: [{"name":"vehicle", "provider":"VehicleProvider", "method":"fake.vehicle_object()"},{"name":"music","provider":"MusicProvider","method":"fake.music_genre_object()"}]
     STATUS:
       created: 50
@@ -19,9 +19,9 @@ services:
       others: 12
     RETENTION_HOURS: 240
   my_orders_modifier:
-    DATABASE_URL: mysql+pymysql://SVC_DS_HELPER:Abcd1234@rdb1.kaskade.local:3306/inventory
-    NUM_PROCESSES: 2
-    WAIT_TIME: [5,30]
+    DATABASE_URL: mysql+pymysql://sql_helper:Abcd1234@db01.kaskade.local:3306/inventory
+    NUM_PROCESSES: 4
+    WAIT_TIME: [3,15]
     STATUS:
       cancelled: 8
       shipped: 12
@@ -30,7 +30,7 @@ services:
     RAND_LAST_HOURS: 12
     
   my_orders_purger:
-    DATABASE_URL: mysql+pymysql://SVC_DS_HELPER:Abcd1234@rdb1.kaskade.local:3306/inventory
+    DATABASE_URL: mysql+pymysql://sql_helper:Abcd1234@db01.kaskade.local:3306/inventory
     NUM_PROCESSES: 1
     WAIT_TIME: [60,120]
     RETENTION_HOURS: 48

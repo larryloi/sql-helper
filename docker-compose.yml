@@ -1,42 +1,31 @@
-version: '3.8'
+#version: '3.8'
 services:
-  mssql_invoices_creator:
-    image: quay.io/larryloi/sql_helper-faker:0.5.0
-    build: .
-    profiles: ["mssql", "all"]
-    hostname: mssql-invoices-creator01
-    dns:
-      - 192.168.50.199
-    volumes:
-      - ./common/:/app/common/
-      - ./mssql_inventory/config.yml:/app/config.yml
-      - ./mssql_inventory/:/app/mssql_inventory/
-    command: ["python", "-u", "mssql_inventory/invoices_creator.py"]
+#   mssql_invoices_creator:
+#     image: quay.io/larryloi/sql_helper-faker:0.5.0
+#     build: .
+#     profiles: ["mssql", "all"]
+#     hostname: mssql-invoices-creator01
+#     dns:
+#       - 192.168.50.199
+#     volumes:
+#       - ./common/:/app/common/
+#       - ./mssql_inventory/config.yml:/app/config.yml
+#       - ./mssql_inventory/:/app/mssql_inventory/
+#     command: ["python", "-u", "mssql_inventory/invoices_creator.py"]
+# 
+#   mssql_invoices_modifier:
+#     image: quay.io/larryloi/sql_helper-faker:0.5.0
+#     build: .
+#     profiles: ["mssql", "all"]
+#     hostname: mssql-invoices-modifier01
+#     dns:
+#       - 192.168.50.199
+#     volumes:
+#       - ./common/:/app/common/
+#       - ./mssql_inventory/config.yml:/app/config.yml
+#       - ./mssql_inventory/:/app/mssql_inventory/
+#     command: ["python", "-u", "mssql_inventory/invoices_modifier.py"]
 
-  mssql_invoices_modifier:
-    image: quay.io/larryloi/sql_helper-faker:0.5.0
-    build: .
-    profiles: ["mssql", "all"]
-    hostname: mssql-invoices-modifier01
-    dns:
-      - 192.168.50.199
-    volumes:
-      - ./common/:/app/common/
-      - ./mssql_inventory/config.yml:/app/config.yml
-      - ./mssql_inventory/:/app/mssql_inventory/
-    command: ["python", "-u", "mssql_inventory/invoices_modifier.py"]
-
-  #mssql_orders_creator:
-  #  image: quay.io/larryloi/sql_helper-faker:0.5.0
-  #  build: .
-  #  profiles: ["mssql", "all"]
-  #  hostname: mssql-orders-creator01
-  #  dns:
-  #    - 192.168.50.199
-  #  volumes:
-  #    - ./mssql_inventory/config.yml:/app/config.yml
-  #    - ./mssql_inventory/:/app/mssql_inventory/
-  #  command: ["python", "-u", "mssql_inventory/orders_creator.py"]
 
   mssql_orders_demo00_creator:
     image: quay.io/larryloi/sql_helper-faker:0.5.0
