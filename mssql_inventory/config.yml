@@ -1,7 +1,9 @@
 services:
+  default_config: &default
+    DATABASE_URL: mssql+pyodbc://sql_helper:Cc123456@db01.kaskade.local:1433/inventory?driver=ODBC+Driver+17+for+SQL+Server
 
   orders_creator:
-    DATABASE_URL: mssql+pyodbc://sql_helper:Cc123456@db01.kaskade.local:1433/inventory?driver=ODBC+Driver+17+for+SQL+Server
+    <<: *default
     NUM_PROCESSES: 4
     WAIT_TIME: [5,10]
     STATUS:
@@ -13,9 +15,9 @@ services:
     RETENTION_HOURS: 240
 
   orders_demo00_creator:
-    DATABASE_URL: mssql+pyodbc://sql_helper:Cc123456@db01.kaskade.local:1433/inventory?driver=ODBC+Driver+17+for+SQL+Server
-    NUM_PROCESSES: 12
-    WAIT_TIME: [1,7]
+    <<: *default
+    NUM_PROCESSES: 4
+    WAIT_TIME: [1,15]
     TYPE: [{"name":"vehicle", "provider":"VehicleProvider", "method":"fake.vehicle_object()"},{"name":"music","provider":"MusicProvider","method":"fake.music_genre_object()"}]
     STATUS:
       created: 50
@@ -26,9 +28,9 @@ services:
     RETENTION_HOURS: 240
 
   orders_demo00_modifier:
-    DATABASE_URL: mssql+pyodbc://sql_helper:Cc123456@db01.kaskade.local:1433/inventory?driver=ODBC+Driver+17+for+SQL+Server
+    <<: *default
     NUM_PROCESSES: 4
-    WAIT_TIME: [5,15]
+    WAIT_TIME: [3,15]
     STATUS:
       cancelled: 8
       shipped: 12
@@ -37,7 +39,7 @@ services:
     RAND_LAST_HOURS: 12
 
   orders_demo00_purger:
-    DATABASE_URL: mssql+pyodbc://sql_helper:Cc123456@db01.kaskade.local:1433/inventory?driver=ODBC+Driver+17+for+SQL+Server
+    <<: *default
     NUM_PROCESSES: 1
     WAIT_TIME: [6,12]
     RETENTION_HOURS: 48
