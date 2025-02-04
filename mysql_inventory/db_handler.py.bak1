@@ -1,0 +1,62 @@
+# db_handler.py
+import logging
+import yaml
+from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_exception_type
+from sqlalchemy import create_engine
+from sqlalchemy.exc import OperationalError, DatabaseError
+
+# Function to load configuration from config.yml
+def load_config(config_path="config.yml"):
+    with open(config_path, "r") as file:
+        config = yaml.safe_load(file)
+    return config
+
+class DBConnectionHandler:
+    def __init__(self, db_url, timeout_seconds=30, max_retries=3):
+        self.db_url = db_url
+        self.timeout_seconds = timeout_seconds
+        self.max_retries = max_retries
+        self.engine = None
+
+    @retry(
+        stop=stop_after_attempt(3),  # Maximum number of retries
+        wait=wait_fixed(2),  # Wait 2 seconds between retries
+        retry=retry_if_exception_type((OperationalError, DatabaseError)),  # Retry on these exceptions
+    )
+    def connect(self):
+        """Establish a database connection with retry logic."""
+        try:
+            self.engine = create_engine(self.db_url, pool_timeout=self.timeout_seconds)
+            logging.info("Database connection established successfully.")
+        except (OperationalError, DatabaseError) as e:
+            logging.error(f"Failed to connect to the database: {e}")
+            raise
+
+    def get_engine(self):
+        """Return the SQLAlchemy engine."""
+        if not self.engine:
+            self.connect()
+        return self.engine
+
+    def close(self):
+        """Close the database connection."""
+        if self.engine:
+            self.engine.dispose()
+            logging.info("Database connection closed.")
+
+if __name__ == "__main__":
+    config = load_config()
+    db_config = config["services"]["default_config"]
+
+    db_handler = DBConnectionHandler(
+        db_url=db_config["DATABASE_URL"],
+        timeout_seconds=db_config["TIMEOUT_SECONDS"],
+        max_retries=db_config["MAX_RETRIES"]
+    )
+
+    try:
+        db_handler.connect()
+        engine = db_handler.get_engine()
+        # Perform database operations
+    finally:
+        db_handler.close()

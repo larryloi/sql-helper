@@ -2,85 +2,68 @@ import os
 import sys
 import random
 import time
-import uuid
 import yaml
-import json
 from datetime import datetime, timedelta
 import pytz
-import sqlalchemy
-from sqlalchemy import create_engine, Table, MetaData, select, func, update
-from sqlalchemy.sql import text
+from sqlalchemy import create_engine, Table, MetaData, select, update
 from multiprocessing import Process
-import mysql.connector
-from faker import Faker
-from faker import Factory as FakerFactory
-from faker_vehicle import VehicleProvider
-from faker_music import MusicProvider
 import logging
+from db_handler import DBConnectionHandler, load_config
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'common')))
-import my_logging 
+import my_logging
 
 local_tz = pytz.timezone('Asia/Macau')
 
 # Load configuration from YAML file
-with open('config.yml', 'r') as f:
-    config = yaml.safe_load(f)
+config = load_config()
 
 service_config = config['services']['my_orders_modifier']
 db_url = service_config['DATABASE_URL']
 wait_time = service_config['WAIT_TIME']
 status = service_config['STATUS']
 num_processes = service_config['NUM_PROCESSES']
-# tmpl_spec = service_config['TMPL_SPEC']
-# types = service_config['TYPE']
-# retention_hours = service_config['RETENTION_HOURS']
-
-# Randomly define a datetime within the last
 rand_last_hours = service_config['RAND_LAST_HOURS']
 
-
 def modify_data():
-    engine = create_engine(db_url)
+    db_handler = DBConnectionHandler(
+        db_url=db_url,
+        timeout_seconds=config['services']['default_config']['TIMEOUT_SECONDS'],
+        max_retries=config['services']['default_config']['MAX_RETRIES']
+    )
     metadata = MetaData()
-    
-    table_name = 'my_orders'
-    my_orders = Table(table_name, metadata, autoload_with=engine)
 
+    try:
+        db_handler.connect()
+        engine = db_handler.get_engine()
+        my_orders = Table('my_orders', metadata, autoload_with=engine)
 
-    while True:
-        wait_time_seconds = random.randint(wait_time[0], wait_time[1])
-        time.sleep(wait_time_seconds)
+        while True:
+            wait_time_seconds = random.randint(wait_time[0], wait_time[1])
+            time.sleep(wait_time_seconds)
 
+            with engine.connect() as connection:
+                try:
+                    random_status = random.choices(list(status.keys()), weights=list(status.values()))[0]
+                    random_time = datetime.now(local_tz) - timedelta(hours=random.random() * rand_last_hours)
+                    select_stmt = select(my_orders).where(my_orders.c.created_at >= random_time).order_by(my_orders.c.id).limit(1)
+                    result = connection.execute(select_stmt)
+                    row = result.fetchone()
 
+                    if row is not None:
+                        update_stmt = update(my_orders).where(my_orders.c.id == row['id']).values({
+                            "status": random_status,
+                            "updated_at": datetime.now(local_tz)
+                        })
 
-        with engine.connect() as connection:
-            try:
-                random_status = random.choices(list(status.keys()), weights=list(status.values()))[0]
-                # Randomly define a datetime within the last 3 days
-                #random_time = datetime.now(local_tz) - timedelta(days=random.random() * 3)
-                
-                # Randomly define a datetime within the last 72 hours (3 days * 24 hours)
-                random_time = datetime.now(local_tz) - timedelta(hours=random.random() * rand_last_hours)
-                
-                # Select the first record after the random tim
-                select_stmt = select(my_orders).where(my_orders.c.created_at >= random_time).order_by(my_orders.c.id).limit(1)
-                result = connection.execute(select_stmt)
-                row = result.fetchone()
+                        logging.info(f"Random time for modifier: {random_time}")
+                        logging.info(f"{update_stmt.compile().string} with parameters {update_stmt.compile().params}")
 
-                if row is not None:
-                  # Update the selected record
-                  update_stmt = update(my_orders).where(my_orders.c.id == row['id']).values({
-                    "status": random_status,
-                    "updated_at": datetime.now(local_tz)
-                  })
-
-                  logging.info(f"Random time for modifier: {random_time}")
-                  logging.info(f"{update_stmt.compile().string} with parameters {update_stmt.compile().params}")
-                  
-                  connection.execute(update_stmt)
-            except sqlalchemy.exc.ProgrammingError:
-                pass
+                        connection.execute(update_stmt)
+                except sqlalchemy.exc.ProgrammingError:
+                    pass
+    finally:
+        db_handler.close()
 
 if __name__ == "__main__":
     processes = []
@@ -93,4 +76,3 @@ if __name__ == "__main__":
 
     for p in processes:
         p.join()
-

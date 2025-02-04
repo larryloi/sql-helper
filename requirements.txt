@@ -9,3 +9,4 @@ mysql-connector-python==8.0.27
 faker-vehicle==0.2.0
 faker_music==0.4
 cryptography
+tenacity

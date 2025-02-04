@@ -1,7 +1,7 @@
 #version: '3.8'
 services:
 #   mssql_invoices_creator:
-#     image: quay.io/larryloi/sql_helper-faker:0.5.0
+#     image: quay.io/larryloi/sql_helper-faker:0.6.0
 #     build: .
 #     profiles: ["mssql", "all"]
 #     hostname: mssql-invoices-creator01
@@ -14,7 +14,7 @@ services:
 #     command: ["python", "-u", "mssql_inventory/invoices_creator.py"]
 # 
 #   mssql_invoices_modifier:
-#     image: quay.io/larryloi/sql_helper-faker:0.5.0
+#     image: quay.io/larryloi/sql_helper-faker:0.6.0
 #     build: .
 #     profiles: ["mssql", "all"]
 #     hostname: mssql-invoices-modifier01
@@ -28,7 +28,7 @@ services:
 
 
   mssql_orders_demo00_creator:
-    image: quay.io/larryloi/sql_helper-faker:0.5.0
+    image: quay.io/larryloi/sql_helper-faker:0.6.0
     build: .
     profiles: ["mssql", "all"]
     hostname: mssql-orders-demo00-creator01
@@ -41,7 +41,7 @@ services:
     command: ["python", "-u", "mssql_inventory/orders_demo00_creator.py"]
 
   mssql_orders_demo00_modifier:
-    image: quay.io/larryloi/sql_helper-faker:0.5.0
+    image: quay.io/larryloi/sql_helper-faker:0.6.0
     build: .
     profiles: ["mssql", "all"]
     hostname: mssql-orders-demo00-modifier01
@@ -54,7 +54,7 @@ services:
     command: ["python", "-u", "mssql_inventory/orders_demo00_modifier.py"]
 
   mssql_orders_demo00_purger:
-    image: quay.io/larryloi/sql_helper-faker:0.5.0
+    image: quay.io/larryloi/sql_helper-faker:0.6.0
     build: .
     profiles: ["mssql", "all"]
     hostname: mssql-orders-demo00-purger01
@@ -69,7 +69,7 @@ services:
 
 
   mysql_suppliers_creator:
-    image: quay.io/larryloi/sql_helper-faker:0.5.0
+    image: quay.io/larryloi/sql_helper-faker:0.6.0
     build: .
     profiles: ["mysql", "all"]
     hostname: mysql-suppliers-creator
@@ -83,7 +83,7 @@ services:
 
 
   mysql_orders_creator:
-    image: quay.io/larryloi/sql_helper-faker:0.5.0
+    image: quay.io/larryloi/sql_helper-faker:0.6.0
     build: .
     profiles: ["mysql", "all"]
     hostname: mysql-orders-creator
@@ -96,7 +96,7 @@ services:
     command: ["python", "-u", "mysql_inventory/my_orders_creator.py"]
 
   mysql_orders_modifier:
-    image: quay.io/larryloi/sql_helper-faker:0.5.0
+    image: quay.io/larryloi/sql_helper-faker:0.6.0
     build: .
     profiles: ["mysql", "all"]
     hostname: mysql-orders-modifier
@@ -109,7 +109,7 @@ services:
     command: ["python", "-u", "mysql_inventory/my_orders_modifier.py"]
 
   mysql_orders_purger:
-    image: quay.io/larryloi/sql_helper-faker:0.5.0
+    image: quay.io/larryloi/sql_helper-faker:0.6.0
     build: .
     profiles: ["mysql", "all"]
     hostname: mysql-orders-purger
