@@ -64,34 +64,35 @@ def insert_data():
         fake = Faker()
         spec = create_fake_data(fake, type_info)
 
+
+        random_status = random.choices(list(status.keys()), weights=list(status.values()))[0]
+
+        insert_stmt = my_orders.insert().values({
+            "order_id": str(uuid.uuid4()),
+            "supplier_id": random.randint(1, 150),
+            "item_id": random.randint(1, 100),
+            "status": random_status,
+            "qty": random.randint(1, 20) * 100,
+            "net_price": random.randint(1, 500) * 10,
+            "tax_rate": random.uniform(1, 10),
+            "issued_at": datetime.now(local_tz),
+            "completed_at": datetime.now(local_tz),
+            "spec": json.dumps(spec),
+            "created_at": datetime.now(local_tz),
+            "updated_at": datetime.now(local_tz)
+        })
+
         try:
-            random_status = random.choices(list(status.keys()), weights=list(status.values()))[0]
-
-            insert_stmt = my_orders.insert().values({
-                "order_id": str(uuid.uuid4()),
-                "supplier_id": random.randint(1, 150),
-                "item_id": random.randint(1, 100),
-                "status": random_status,
-                "qty": random.randint(1, 20) * 100,
-                "net_price": random.randint(1, 500) * 10,
-                "tax_rate": random.uniform(1, 10),
-                "issued_at": datetime.now(local_tz),
-                "completed_at": datetime.now(local_tz),
-                "spec": json.dumps(spec),
-                "created_at": datetime.now(local_tz),
-                "updated_at": datetime.now(local_tz)
-            })
-
             with engine.connect() as connection:
                 result = connection.execute(insert_stmt)
                 logging.info(f"Inserted: {result.inserted_primary_key}")
 
         except sqlalchemy.exc.ProgrammingError as e:
             logging.error(f"Database error: {e}")
-            continue
+            
         except Exception as e:
             logging.error(f"Unexpected error: {e}")
-            continue
+            
 
 if __name__ == "__main__":
     processes = []

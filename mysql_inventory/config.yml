@@ -1,6 +1,6 @@
 services:
   default_config: &default
-    DATABASE_URL: mysql+pymysql://sql_helper:Abcd1234@db01.kaskade.local:3307/inventory
+    DATABASE_URL: mysql+pymysql://sql_helper:Abcd1234@db01.kaskade.local:3306/inventory
     TIMEOUT_SECONDS: 30
     MAX_RETRIES: 3
 
@@ -14,7 +14,7 @@ services:
 
   my_orders_creator:
     <<: *default
-    NUM_PROCESSES: 1
+    NUM_PROCESSES: 4
     WAIT_TIME: [1,15]
     TYPE: [{"name":"vehicle", "provider":"VehicleProvider", "method":"fake.vehicle_object()"},{"name":"music","provider":"MusicProvider","method":"fake.music_genre_object()"}]
     STATUS:

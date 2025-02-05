@@ -32,6 +32,8 @@ services:
     build: .
     profiles: ["mssql", "all"]
     hostname: mssql-orders-demo00-creator01
+    environment:
+      - TZ=Asia/Macau
     dns:
       - 192.168.50.199
     volumes:
@@ -45,6 +47,8 @@ services:
     build: .
     profiles: ["mssql", "all"]
     hostname: mssql-orders-demo00-modifier01
+    environment:
+      - TZ=Asia/Macau
     dns:
       - 192.168.50.199
     volumes:
@@ -58,6 +62,8 @@ services:
     build: .
     profiles: ["mssql", "all"]
     hostname: mssql-orders-demo00-purger01
+    environment:
+      - TZ=Asia/Macau
     dns:
       - 192.168.50.199
     volumes:
@@ -73,6 +79,8 @@ services:
     build: .
     profiles: ["mysql", "all"]
     hostname: mysql-suppliers-creator
+    environment:
+      - TZ=Asia/Macau
     dns:
       - 192.168.50.199
     volumes:
@@ -87,6 +95,8 @@ services:
     build: .
     profiles: ["mysql", "all"]
     hostname: mysql-orders-creator
+    environment:
+      - TZ=Asia/Macau
     dns:
       - 192.168.50.199
     volumes:
@@ -100,6 +110,8 @@ services:
     build: .
     profiles: ["mysql", "all"]
     hostname: mysql-orders-modifier
+    environment:
+      - TZ=Asia/Macau
     dns:
       - 192.168.50.199
     volumes:
@@ -113,6 +125,8 @@ services:
     build: .
     profiles: ["mysql", "all"]
     hostname: mysql-orders-purger
+    environment:
+      - TZ=Asia/Macau
     dns:
       - 192.168.50.199
     volumes:
