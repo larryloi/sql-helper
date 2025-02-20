@@ -1,18 +1,49 @@
-# db_handler.py
 import logging
 import yaml
+import os
+import sys
 from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_exception_type, RetryError
 from sqlalchemy import create_engine
-from sqlalchemy.exc import OperationalError, DatabaseError
+from sqlalchemy.exc import OperationalError, DatabaseError, SQLAlchemyError
 
-# Function to load configuration from config.yml
-def load_config(config_path="config.yml"):
-    with open(config_path, "r") as file:
-        config = yaml.safe_load(file)
-    return config
+# Set up logging
+# logging.basicConfig(level=logging.INFO)
+# logger = logging.getLogger(__name__)
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'common')))
+import my_logging
+
+def load_config(config_path="mysql_inventory/config.yml"):
+    """
+    Load configuration from a YAML file.
+    
+    Args:
+        config_path (str): Path to the configuration file.
+    
+    Returns:
+        dict: Loaded configuration.
+    """
+    try:
+        with open(config_path, "r") as file:
+            config = yaml.safe_load(file)
+        logging.info(f"Configuration loaded successfully from {config_path}.")
+        return config
+    except FileNotFoundError:
+        logging.error(f"Configuration file not found at {config_path}.")
+        raise
+    except yaml.YAMLError as e:
+        logging.error(f"Error parsing YAML file: {e}")
+        raise
 
 class DBConnectionHandler:
     def __init__(self, db_url, timeout_seconds=30, max_retries=3):
+        """
+        Initialize the database connection handler.
+        
+        Args:
+            db_url (str): Database connection URL.
+            timeout_seconds (int): Connection timeout in seconds.
+            max_retries (int): Maximum number of retry attempts.
+        """
         self.db_url = db_url
         self.timeout_seconds = timeout_seconds
         self.max_retries = max_retries
@@ -25,16 +56,32 @@ class DBConnectionHandler:
         reraise=True
     )
     def connect(self, attempt=1):
-        """Establish a database connection with retry logic."""
+        """
+        Establish a database connection with retry logic.
+        
+        Args:
+            attempt (int): Current retry attempt number.
+        """
         try:
             self.engine = create_engine(self.db_url, pool_timeout=self.timeout_seconds)
             logging.info(f"Attempt {attempt}: Database connection established successfully.")
         except (OperationalError, DatabaseError) as e:
             logging.error(f"Attempt {attempt}: Failed to connect to the database: {e}")
             raise
+        except SQLAlchemyError as e:
+            logging.error(f"Attempt {attempt}: SQLAlchemy error: {e}")
+            raise
 
     def get_engine(self):
-        """Return the SQLAlchemy engine."""
+        """
+        Return the SQLAlchemy engine.
+        
+        Returns:
+            sqlalchemy.engine.Engine: The database engine.
+        
+        Raises:
+            RetryError: If all retry attempts fail.
+        """
         if not self.engine:
             try:
                 for attempt in range(1, self.max_retries + 1):
@@ -52,6 +99,13 @@ class DBConnectionHandler:
         return self.engine
 
     def close(self):
-        """Close the database connection."""
+        """
+        Close the database connection and dispose of the engine.
+        """
         if self.engine:
-            self.engine.dispose
+            try:
+                self.engine.dispose()
+                logging.info("Database connection closed successfully.")
+            except SQLAlchemyError as e:
+                logging.error(f"Error closing database connection: {e}")
+                raise

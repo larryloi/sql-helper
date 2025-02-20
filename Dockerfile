@@ -16,4 +16,5 @@ FROM base AS app
 
 WORKDIR /app
 COPY . /app
-CMD ["python", "-u", "mssql_inventory/invoices_creator.py"]
+#ENTRYPOINT ["/usr/bin/bash"]
+#CMD ["python", "-u", "mssql_inventory/invoices_creator.py"]

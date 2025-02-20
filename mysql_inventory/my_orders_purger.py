@@ -1,3 +1,4 @@
+### my_orders_purger.py
 import os
 import sys
 import yaml
@@ -9,6 +10,7 @@ import sqlalchemy
 from sqlalchemy import create_engine, Table, MetaData, select, func
 from sqlalchemy.sql import text
 import logging
+from db_handler import DBConnectionHandler, load_config
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'common')))
 import my_logging 
@@ -16,8 +18,7 @@ import my_logging
 local_tz = pytz.timezone('Asia/Macau')
 
 # Load configuration from YAML file
-with open('config.yml', 'r') as f:
-    config = yaml.safe_load(f)
+config = load_config()
 
 service_config = config['services']['my_orders_purger']
 db_url = service_config['DATABASE_URL']

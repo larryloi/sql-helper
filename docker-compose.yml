@@ -91,7 +91,7 @@ services:
 
 
   mysql_orders_creator:
-    image: quay.io/larryloi/sql_helper-faker:0.6.0
+    image: quay.io/larryloi/sql_helper-faker:0.7.1
     build: .
     profiles: ["mysql", "all"]
     hostname: mysql-orders-creator
@@ -99,14 +99,14 @@ services:
       - TZ=Asia/Macau
     dns:
       - 192.168.50.199
-    volumes:
-      - ./common/:/app/common/
-      - ./mysql_inventory/config.yml:/app/config.yml
-      - ./mysql_inventory/:/app/mysql_inventory/
-    command: ["python", "-u", "mysql_inventory/my_orders_creator.py"]
+#     volumes:
+#       - ./common/:/app/common/
+#       - ./mysql_inventory/config.yml:/app/config.yml
+#       - ./mysql_inventory/:/app/mysql_inventory/
+    command: ["python", "-u", "/app/mysql_inventory/my_orders_creator.py"]
 
   mysql_orders_modifier:
-    image: quay.io/larryloi/sql_helper-faker:0.6.0
+    image: quay.io/larryloi/sql_helper-faker:0.7.1
     build: .
     profiles: ["mysql", "all"]
     hostname: mysql-orders-modifier
@@ -114,14 +114,14 @@ services:
       - TZ=Asia/Macau
     dns:
       - 192.168.50.199
-    volumes:
-      - ./common/:/app/common/
-      - ./mysql_inventory/config.yml:/app/config.yml
-      - ./mysql_inventory/:/app/mysql_inventory/
+#     volumes:
+#       - ./common/:/app/common/
+#       - ./mysql_inventory/config.yml:/app/config.yml
+#       - ./mysql_inventory/:/app/mysql_inventory/
     command: ["python", "-u", "mysql_inventory/my_orders_modifier.py"]
 
   mysql_orders_purger:
-    image: quay.io/larryloi/sql_helper-faker:0.6.0
+    image: quay.io/larryloi/sql_helper-faker:0.7.1
     build: .
     profiles: ["mysql", "all"]
     hostname: mysql-orders-purger
@@ -129,8 +129,8 @@ services:
       - TZ=Asia/Macau
     dns:
       - 192.168.50.199
-    volumes:
-      - ./common/:/app/common/
-      - ./mysql_inventory/config.yml:/app/config.yml
-      - ./mysql_inventory/:/app/mysql_inventory/
+#     volumes:
+#       - ./common/:/app/common/
+#       - ./mysql_inventory/config.yml:/app/config.yml
+#       - ./mysql_inventory/:/app/mysql_inventory/
     command: ["python", "-u", "mysql_inventory/my_orders_purger.py"]
