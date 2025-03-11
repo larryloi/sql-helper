@@ -1,4 +1,4 @@
-### my_orders_modifier.py
+### orders_modifier.py
 import os
 import sys
 import random
@@ -19,7 +19,7 @@ local_tz = pytz.timezone('Asia/Macau')
 # Load configuration from YAML file
 config = load_config()
 
-service_config = config['services']['my_orders_modifier']
+service_config = config['services']['orders_modifier']
 db_url = service_config['DATABASE_URL']
 wait_time = service_config['WAIT_TIME']
 status = service_config['STATUS']
@@ -37,7 +37,7 @@ def modify_data():
     try:
         db_handler.connect()
         engine = db_handler.get_engine()
-        my_orders = Table('my_orders', metadata, autoload_with=engine)
+        orders = Table('orders', metadata, autoload_with=engine)
 
         while True:
             wait_time_seconds = random.randint(wait_time[0], wait_time[1])
@@ -47,12 +47,12 @@ def modify_data():
                 try:
                     random_status = random.choices(list(status.keys()), weights=list(status.values()))[0]
                     random_time = datetime.now(local_tz) - timedelta(hours=random.random() * rand_last_hours)
-                    select_stmt = select(my_orders).where(my_orders.c.created_at >= random_time).order_by(my_orders.c.id).limit(1)
+                    select_stmt = select(orders).where(orders.c.created_at >= random_time).order_by(orders.c.id).limit(1)
                     result = connection.execute(select_stmt)
                     row = result.fetchone()
 
                     if row is not None:
-                        update_stmt = update(my_orders).where(my_orders.c.id == row['id']).values({
+                        update_stmt = update(orders).where(orders.c.id == row['id']).values({
                             "status": random_status,
                             "updated_at": datetime.now(local_tz)
                         })

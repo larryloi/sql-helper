@@ -16,7 +16,7 @@ CREATE INDEX suppliers_type_IDX USING BTREE ON suppliers (`type`);
 
 
 
-CREATE TABLE my_orders (
+CREATE TABLE orders (
     id BIGINT AUTO_INCREMENT NOT NULL,
     order_id VARCHAR(36) NOT NULL,
     supplier_id INT NOT NULL,
@@ -33,9 +33,9 @@ CREATE TABLE my_orders (
     PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
-CREATE INDEX IDX_my_orders_issued_at ON my_orders (issued_at);
-CREATE UNIQUE INDEX IDX_my_orders_order_id ON my_orders (order_id);
-CREATE INDEX IDX_my_orders_completed_at ON my_orders (completed_at);
-CREATE INDEX IDX_my_orders_created_at ON my_orders (created_at);
-CREATE INDEX IDX_my_orders_updated_at ON my_orders (updated_at);
+CREATE INDEX IDX_orders_issued_at ON orders (issued_at);
+CREATE UNIQUE INDEX IDX_orders_order_id ON orders (order_id);
+CREATE INDEX IDX_orders_completed_at ON orders (completed_at);
+CREATE INDEX IDX_orders_created_at ON orders (created_at);
+CREATE INDEX IDX_orders_updated_at ON orders (updated_at);
 

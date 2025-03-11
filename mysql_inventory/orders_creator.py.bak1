@@ -27,7 +27,7 @@ local_tz = pytz.timezone('Asia/Macau')
 with open('config.yml', 'r') as f:
     config = yaml.safe_load(f)
 
-service_config = config['services']['my_orders_creator']
+service_config = config['services']['orders_creator']
 db_url = service_config['DATABASE_URL']
 wait_time = service_config['WAIT_TIME']
 status = service_config['STATUS']
@@ -53,10 +53,10 @@ def create_fake_data(fake, type_info):
 def insert_data():
     engine = create_engine(db_url)
     metadata = MetaData()
-    #my_orders = Table('my_orders', metadata, autoload_with=engine, schema='inventory.INV')
+    #orders = Table('orders', metadata, autoload_with=engine, schema='inventory.INV')
     
-    table_name = 'my_orders'
-    my_orders = Table(table_name, metadata, autoload_with=engine)
+    table_name = 'orders'
+    orders = Table(table_name, metadata, autoload_with=engine)
 
 
     while True:
@@ -83,7 +83,7 @@ def insert_data():
             try:
                 random_status = random.choices(list(status.keys()), weights=list(status.values()))[0]
 
-                insert_stmt = my_orders.insert().values({
+                insert_stmt = orders.insert().values({
                     "order_id": str(uuid.uuid4()),
                     "supplier_id": random.randint(1, 150),
                     "item_id": random.randint(1, 100),

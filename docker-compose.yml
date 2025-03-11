@@ -75,7 +75,7 @@ services:
 
 
   mysql_suppliers_creator:
-    image: quay.io/larryloi/sql_helper-faker:0.6.0
+    image: quay.io/larryloi/sql_helper-faker:0.7.2
     build: .
     profiles: ["mysql", "all"]
     hostname: mysql-suppliers-creator
@@ -91,7 +91,7 @@ services:
 
 
   mysql_orders_creator:
-    image: quay.io/larryloi/sql_helper-faker:0.7.1
+    image: quay.io/larryloi/sql_helper-faker:0.7.2
     build: .
     profiles: ["mysql", "all"]
     hostname: mysql-orders-creator
@@ -99,14 +99,14 @@ services:
       - TZ=Asia/Macau
     dns:
       - 192.168.50.199
-#     volumes:
-#       - ./common/:/app/common/
-#       - ./mysql_inventory/config.yml:/app/config.yml
+    volumes:
+      - ./mysql_inventory/config.yml:/app/mysql_inventory/config.yml
 #       - ./mysql_inventory/:/app/mysql_inventory/
-    command: ["python", "-u", "/app/mysql_inventory/my_orders_creator.py"]
+#      - ./common/:/app/common/
+    command: ["python", "-u", "/app/mysql_inventory/orders_creator.py"]
 
   mysql_orders_modifier:
-    image: quay.io/larryloi/sql_helper-faker:0.7.1
+    image: quay.io/larryloi/sql_helper-faker:0.7.2
     build: .
     profiles: ["mysql", "all"]
     hostname: mysql-orders-modifier
@@ -114,14 +114,15 @@ services:
       - TZ=Asia/Macau
     dns:
       - 192.168.50.199
-#     volumes:
-#       - ./common/:/app/common/
-#       - ./mysql_inventory/config.yml:/app/config.yml
+    volumes:
+      - ./mysql_inventory/config.yml:/app/mysql_inventory/config.yml
 #       - ./mysql_inventory/:/app/mysql_inventory/
-    command: ["python", "-u", "mysql_inventory/my_orders_modifier.py"]
+#       - ./common/:/app/common/
+
+    command: ["python", "-u", "/app/mysql_inventory/orders_modifier.py"]
 
   mysql_orders_purger:
-    image: quay.io/larryloi/sql_helper-faker:0.7.1
+    image: quay.io/larryloi/sql_helper-faker:0.7.2
     build: .
     profiles: ["mysql", "all"]
     hostname: mysql-orders-purger
@@ -129,8 +130,10 @@ services:
       - TZ=Asia/Macau
     dns:
       - 192.168.50.199
-#     volumes:
-#       - ./common/:/app/common/
-#       - ./mysql_inventory/config.yml:/app/config.yml
+    volumes:
+      - ./mysql_inventory/config.yml:/app/mysql_inventory/config.yml
 #       - ./mysql_inventory/:/app/mysql_inventory/
-    command: ["python", "-u", "mysql_inventory/my_orders_purger.py"]
+#       - ./common/:/app/common/
+
+
+    command: ["python", "-u", "/app/mysql_inventory/orders_purger.py"]

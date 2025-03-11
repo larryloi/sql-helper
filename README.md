@@ -36,7 +36,7 @@ services:
     NUM_PROCESSES: 1               ## Number of processes will be spawn
     RETENTION_HOUR: 2160           ## data retention by hour
 
-  my_orders_creator:
+  orders_creator:
     <<: *default
     NUM_PROCESSES: 100
     WAIT_TIME: [1,7]

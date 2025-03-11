@@ -1,8 +1,10 @@
 services:
   default_config: &default
-    DATABASE_URL: mysql+pymysql://sql_helper:Abcd1234@db01.kaskade.local:3307/inventory
+    DATABASE_URL: mysql+pymysql://sql_helper:Abcd1234@db01.kaskade.local:3306/inventory01
     TIMEOUT_SECONDS: 30
     MAX_RETRIES: 3
+    COMPLEX: NONE  
+    # Default value is JSON, can be overridden to NONE  
 
   supplier_creator:
     <<: *default
@@ -12,7 +14,7 @@ services:
     NUM_PROCESSES: 1
     RETENTION_HOUR: 2160
 
-  my_orders_creator:
+  orders_creator:
     <<: *default
     NUM_PROCESSES: 2
     WAIT_TIME: [1,15]
@@ -25,7 +27,7 @@ services:
       others: 12
     RETENTION_HOURS: 240
 
-  my_orders_modifier:
+  orders_modifier:
     <<: *default
     NUM_PROCESSES: 2
     WAIT_TIME: [3,15]
@@ -36,7 +38,7 @@ services:
       completed: 40
     RAND_LAST_HOURS: 12
     
-  my_orders_purger:
+  orders_purger:
     <<: *default
     NUM_PROCESSES: 1
     WAIT_TIME: [60,120]
