@@ -1,6 +1,6 @@
 services:
   default_config: &default
-    DATABASE_URL: mssql+pyodbc://sql_helper:Cc123456@db01.kaskade.local:1433/inventory?driver=ODBC+Driver+17+for+SQL+Server
+    DATABASE_URL: mssql+pyodbc://sql_helper:Abcd1234@db01.kaskade.local:1433/inventory?driver=ODBC+Driver+17+for+SQL+Server
 
   orders_creator:
     <<: *default

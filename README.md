@@ -12,6 +12,18 @@ make build.base
 make build.app
 ```
 
+
+### Prepare schema
+Run sql script below
+- MySQL
+  - mysql_inventory/ACL.sql
+  - mysql_inventory/DDL.sql
+
+- SQL Server
+  - mssql_inventory/DDL.sql
+
+
+
 ### Prepare your config
 - MySQL 
   - update mysql_inventory/config.yml
@@ -54,6 +66,8 @@ services:
 - For MySQL
 ```shell
 docker compose --profile mysql up -d
+
+docker compose --profile mssql logs -f mssql_orders_demo00_creator mssql_orders_demo00_modifier mssql_orders_demo00_purger
 ```
 
 - For SQL Server
