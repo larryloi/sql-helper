@@ -1,4 +1,4 @@
-FROM python:3.8 AS base
+FROM python:3.8-slim AS base
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends gcc g++ unixodbc-dev gnupg curl procps && \
