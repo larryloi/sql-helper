@@ -1,4 +1,5 @@
-### orders_creator.py
+
+# mysql orders_creator.py
 import os
 import sys
 import random
@@ -83,13 +84,14 @@ def insert_data():
             "tax_rate": random.uniform(1, 10),
             "issued_at": datetime.now(local_tz),
             "completed_at": datetime.now(local_tz),
+            "spec": spec_value,
             "created_at": datetime.now(local_tz),
             "updated_at": datetime.now(local_tz)
         }
 
         # Add spec column only if COMPLEX is JSON
-        if complex_config == "JSON":
-            insert_values["spec"] = spec_value
+        #if complex_config == "JSON":
+        #    insert_values["spec"] = spec_value
 
         insert_stmt = orders.insert().values(insert_values)
 

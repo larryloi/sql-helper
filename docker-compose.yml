@@ -1,76 +1,48 @@
 #version: '3.8'
 services:
-#   mssql_invoices_creator:
-#     image: quay.io/larryloi/sql_helper-faker:0.6.0
-#     build: .
-#     profiles: ["mssql", "all"]
-#     hostname: mssql-invoices-creator01
-#     dns:
-#       - 192.168.50.199
-#     volumes:
-#       - ./common/:/app/common/
-#       - ./mssql_inventory/config.yml:/app/config.yml
-#       - ./mssql_inventory/:/app/mssql_inventory/
-#     command: ["python", "-u", "mssql_inventory/invoices_creator.py"]
-# 
-#   mssql_invoices_modifier:
-#     image: quay.io/larryloi/sql_helper-faker:0.6.0
-#     build: .
-#     profiles: ["mssql", "all"]
-#     hostname: mssql-invoices-modifier01
-#     dns:
-#       - 192.168.50.199
-#     volumes:
-#       - ./common/:/app/common/
-#       - ./mssql_inventory/config.yml:/app/config.yml
-#       - ./mssql_inventory/:/app/mssql_inventory/
-#     command: ["python", "-u", "mssql_inventory/invoices_modifier.py"]
 
-
-  mssql_orders_demo00_creator:
-    image: quay.io/larryloi/sql_helper-faker:0.6.0
+  mssql_orders_creator:
+    image: quay.io/larryloi/sql_helper-faker:0.7.2
     build: .
     profiles: ["mssql", "all"]
-    hostname: mssql-orders-demo00-creator01
+    hostname: mssql-orders-creator01
     environment:
       - TZ=Asia/Macau
-    dns:
-      - 192.168.50.199
     volumes:
       - ./common/:/app/common/
       - ./mssql_inventory/config.yml:/app/config.yml
-      - ./mssql_inventory/:/app/mssql_inventory/
-    command: ["python", "-u", "mssql_inventory/orders_demo00_creator.py"]
+#      - ./mssql_inventory/:/app/mssql_inventory/
+    command: ["python", "-u", "mssql_inventory/orders_creator.py"]
 
-  mssql_orders_demo00_modifier:
-    image: quay.io/larryloi/sql_helper-faker:0.6.0
+
+  mssql_orders_modifier:
+    image: quay.io/larryloi/sql_helper-faker:0.7.2
     build: .
     profiles: ["mssql", "all"]
-    hostname: mssql-orders-demo00-modifier01
+    hostname: mssql-orders-modifier01
     environment:
       - TZ=Asia/Macau
-    dns:
-      - 192.168.50.199
     volumes:
       - ./common/:/app/common/
       - ./mssql_inventory/config.yml:/app/config.yml
-      - ./mssql_inventory/:/app/mssql_inventory/
-    command: ["python", "-u", "mssql_inventory/orders_demo00_modifier.py"]
+#      - ./mssql_inventory/:/app/mssql_inventory/
+    command: ["python", "-u", "mssql_inventory/orders_modifier.py"]
 
-  mssql_orders_demo00_purger:
-    image: quay.io/larryloi/sql_helper-faker:0.6.0
+
+  mssql_orders_purger:
+    image: quay.io/larryloi/sql_helper-faker:0.7.2
     build: .
     profiles: ["mssql", "all"]
-    hostname: mssql-orders-demo00-purger01
+    hostname: mssql-orders-purger01
     environment:
       - TZ=Asia/Macau
-    dns:
-      - 192.168.50.199
     volumes:
       - ./common/:/app/common/
       - ./mssql_inventory/config.yml:/app/config.yml
-      - ./mssql_inventory/:/app/mssql_inventory/
-    command: ["python", "-u", "mssql_inventory/orders_demo00_purger.py"]
+#      - ./mssql_inventory/:/app/mssql_inventory/
+    command: ["python", "-u", "mssql_inventory/orders_purger.py"]
+
+
 
 
 
@@ -81,8 +53,6 @@ services:
     hostname: mysql-suppliers-creator
     environment:
       - TZ=Asia/Macau
-    dns:
-      - 192.168.50.199
     volumes:
       - ./common/:/app/common/
       - ./mysql_inventory/config.yml:/app/config.yml
@@ -97,11 +67,9 @@ services:
     hostname: mysql-orders-creator
     environment:
       - TZ=Asia/Macau
-    dns:
-      - 192.168.50.199
     volumes:
       - ./mysql_inventory/config.yml:/app/mysql_inventory/config.yml
-#       - ./mysql_inventory/:/app/mysql_inventory/
+#      - ./mysql_inventory/:/app/mysql_inventory/
 #      - ./common/:/app/common/
     command: ["python", "-u", "/app/mysql_inventory/orders_creator.py"]
 
@@ -112,8 +80,6 @@ services:
     hostname: mysql-orders-modifier
     environment:
       - TZ=Asia/Macau
-    dns:
-      - 192.168.50.199
     volumes:
       - ./mysql_inventory/config.yml:/app/mysql_inventory/config.yml
 #       - ./mysql_inventory/:/app/mysql_inventory/
@@ -128,8 +94,6 @@ services:
     hostname: mysql-orders-purger
     environment:
       - TZ=Asia/Macau
-    dns:
-      - 192.168.50.199
     volumes:
       - ./mysql_inventory/config.yml:/app/mysql_inventory/config.yml
 #       - ./mysql_inventory/:/app/mysql_inventory/

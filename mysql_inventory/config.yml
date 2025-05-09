@@ -1,9 +1,10 @@
+
 services:
   default_config: &default
-    DATABASE_URL: mysql+pymysql://sql_helper:Abcd1234@db01.kaskade.local:3306/inventory01
+    DATABASE_URL: mysql+pymysql://sql_helper:Abcd1234@db01.kaskade.local:3306/inventory
     TIMEOUT_SECONDS: 30
     MAX_RETRIES: 3
-    COMPLEX: NONE  
+    COMPLEX: NONE
     # Default value is JSON, can be overridden to NONE  
 
   supplier_creator:

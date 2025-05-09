@@ -1,7 +1,12 @@
+
 services:
   default_config: &default
     DATABASE_URL: mssql+pyodbc://sql_helper:Abcd1234@db01.kaskade.local:1433/inventory?driver=ODBC+Driver+17+for+SQL+Server
-
+    TIMEOUT_SECONDS: 30
+    MAX_RETRIES: 3
+    COMPLEX: NONE
+    # Default value is JSON, can be overridden to NONE  
+    
   orders_creator:
     <<: *default
     NUM_PROCESSES: 4
@@ -14,7 +19,7 @@ services:
       others: 12
     RETENTION_HOURS: 240
 
-  orders_demo00_creator:
+  orders_creator:
     <<: *default
     NUM_PROCESSES: 4
     WAIT_TIME: [1,15]
@@ -27,7 +32,7 @@ services:
       others: 12
     RETENTION_HOURS: 240
 
-  orders_demo00_modifier:
+  orders_modifier:
     <<: *default
     NUM_PROCESSES: 4
     WAIT_TIME: [3,15]
@@ -38,7 +43,7 @@ services:
       completed: 40
     RAND_LAST_HOURS: 12
 
-  orders_demo00_purger:
+  orders_purger:
     <<: *default
     NUM_PROCESSES: 1
     WAIT_TIME: [6,12]

@@ -1,3 +1,6 @@
+
+# orders_purger.pytz
+
 import os
 import sys
 import random
@@ -22,7 +25,7 @@ local_tz = pytz.timezone('Asia/Macau')
 with open('config.yml', 'r') as f:
     config = yaml.safe_load(f)
 
-service_config = config['services']['orders_demo00_purger']
+service_config = config['services']['orders_purger']
 wait_time = service_config['WAIT_TIME']
 num_processes = service_config['NUM_PROCESSES']
 retention_hours = service_config['RETENTION_HOURS']
@@ -31,7 +34,7 @@ batch_size = service_config['BATCH_SIZE']
 def purge_data():
     engine = create_engine(service_config['DATABASE_URL'])
     metadata = MetaData()
-    orders_demo00 = Table('orders_demo00', metadata, autoload_with=engine, schema='inventory.INV')
+    orders = Table('orders', metadata, autoload_with=engine, schema='inventory.INV')
 
     while True:
         wait_time_seconds = random.randint(wait_time[0], wait_time[1])
@@ -42,14 +45,14 @@ def purge_data():
             try:
                 # Determine the purge range
                 
-                select_stmt = select([orders_demo00.c.order_id]).where(text(f"DATEDIFF(HOUR, updated_at, GETDATE()) > {retention_hours}")).limit(batch_size)
+                select_stmt = select([orders.c.order_id]).where(text(f"DATEDIFF(HOUR, updated_at, GETDATE()) > {retention_hours}")).limit(batch_size)
                 #logging.info(f"{select_stmt.compile().string} with parameters {select_stmt.compile().params}")
                 result = connection.execute(select_stmt)
                 rows_to_delete = result.fetchall()
 
                 
                 while rows_to_delete:
-                    delete_stmt = orders_demo00.delete().where(orders_demo00.c.order_id.in_([row['order_id'] for row in rows_to_delete]))
+                    delete_stmt = orders.delete().where(orders.c.order_id.in_([row['order_id'] for row in rows_to_delete]))
                     result = connection.execute(delete_stmt)
 
                     logging.info(f"{delete_stmt.compile().string} with parameters {delete_stmt.compile().params}")

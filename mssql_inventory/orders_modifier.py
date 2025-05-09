@@ -1,3 +1,6 @@
+
+# orders_modifier.py
+
 import os
 import sys
 import random
@@ -21,7 +24,7 @@ local_tz = pytz.timezone('Asia/Macau')
 with open('config.yml', 'r') as f:
     config = yaml.safe_load(f)
 
-service_config = config['services']['orders_demo00_modifier']
+service_config = config['services']['orders_modifier']
 wait_time = service_config['WAIT_TIME']
 status = service_config['STATUS']
 num_processes = service_config['NUM_PROCESSES']
@@ -30,7 +33,7 @@ rand_last_hours = service_config['RAND_LAST_HOURS']
 def modify_data():
     engine = create_engine(service_config['DATABASE_URL'])
     metadata = MetaData()
-    orders_demo00 = Table('orders_demo00', metadata, autoload_with=engine, schema='inventory.INV')
+    orders = Table('orders', metadata, autoload_with=engine, schema='inventory.INV')
 
     while True:
         wait_time_seconds = random.randint(wait_time[0], wait_time[1])
@@ -43,14 +46,14 @@ def modify_data():
                 random_time = datetime.now(local_tz) - timedelta(hours=random.random() * rand_last_hours)
 
                 # Select the first record after the random time
-                select_stmt = select(orders_demo00).where(orders_demo00.c.created_at >= random_time).order_by(orders_demo00.c.id).limit(1)
+                select_stmt = select(orders).where(orders.c.created_at >= random_time).order_by(orders.c.id).limit(1)
                 #logging.info(f"{select_stmt.compile().string} with parameters {select_stmt.compile().params}")
                 result = connection.execute(select_stmt)
                 row = result.fetchone()
 
                 if row is not None:
                     # Update the selected record
-                    update_stmt = update(orders_demo00).where(orders_demo00.c.id == row['id']).values({
+                    update_stmt = update(orders).where(orders.c.id == row['id']).values({
                         "status": random_status,
                         "updated_at": datetime.now(local_tz)
                     })

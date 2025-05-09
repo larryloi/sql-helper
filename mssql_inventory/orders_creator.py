@@ -1,3 +1,6 @@
+
+# orders_creator
+
 import os
 import sys
 import random
@@ -11,7 +14,7 @@ import sqlalchemy
 from sqlalchemy import create_engine, Table, MetaData, select, func
 from sqlalchemy.sql import text
 from multiprocessing import Process
-import mysql.connector
+
 from faker import Faker
 from faker import Factory as FakerFactory
 from faker_vehicle import VehicleProvider
@@ -28,13 +31,14 @@ with open('config.yml', 'r') as f:
     config = yaml.safe_load(f)
 
 service_config = config['services']['orders_creator']
-db_url = service_config['DATABASE_URL']
+
 wait_time = service_config['WAIT_TIME']
 status = service_config['STATUS']
 num_processes = service_config['NUM_PROCESSES']
 # tmpl_spec = service_config['TMPL_SPEC']
 types = service_config['TYPE']
 retention_hours = service_config['RETENTION_HOURS']
+complex_config = service_config.get('COMPLEX', 'JSON')  # Get COMPLEX config, default to JSON
 
 
 def create_fake_data(fake, type_info):
@@ -51,13 +55,9 @@ def create_fake_data(fake, type_info):
     return spec
 
 def insert_data():
-    engine = create_engine(db_url)
+    engine = create_engine(service_config['DATABASE_URL'])
     metadata = MetaData()
-    #orders = Table('orders', metadata, autoload_with=engine, schema='inventory.INV')
-    
-    table_name = 'orders'
-    orders = Table(table_name, metadata, autoload_with=engine)
-
+    orders = Table('orders', metadata, autoload_with=engine, schema='inventory.INV')
 
     while True:
         wait_time_seconds = random.randint(wait_time[0], wait_time[1])
@@ -65,8 +65,14 @@ def insert_data():
 
         type_info = random.choice(types)
         fake = Faker()
-    
-        spec = create_fake_data(fake, type_info)
+
+        # Handle COMPLEX configuration
+        if complex_config == "JSON":
+            spec = create_fake_data(fake, type_info)
+            spec_value = json.dumps(spec)
+        else:
+            spec_value = None  # Set spec to NULL if COMPLEX is NONE    
+#        spec = create_fake_data(fake, type_info)
         
 #        print (f"{spec}")
 #         print(type(spec)) 
@@ -90,16 +96,14 @@ def insert_data():
                     "status": random_status,
                     "qty": random.randint(1, 20) * 100,
                     "net_price": random.randint(1, 500) * 10,
-                    "tax_rate": random.uniform(1, 10),
                     "issued_at": datetime.now(local_tz),
                     "completed_at": datetime.now(local_tz),
-                    "spec": json.dumps(spec),
+                    "spec": spec_value,
                     "created_at": datetime.now(local_tz),
                     "updated_at": datetime.now(local_tz)
                 })
 
                 result = connection.execute(insert_stmt)
-
                 logging.info(f"Inserted: {result.inserted_primary_key}")
 
             except sqlalchemy.exc.ProgrammingError:
