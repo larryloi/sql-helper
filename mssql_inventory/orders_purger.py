@@ -38,7 +38,7 @@ def purge_data():
 
     while True:
         wait_time_seconds = random.randint(wait_time[0], wait_time[1])
-        logging.info(f"Waiting for {wait_time_seconds} seconds before purging...")
+        logging.info(f"RETENTION_HOURS: {retention_hours}; Waiting for {wait_time_seconds} seconds before purging...")
         time.sleep(wait_time_seconds)
 
         with engine.connect() as connection:
@@ -57,8 +57,7 @@ def purge_data():
 
                     logging.info(f"{delete_stmt.compile().string} with parameters {delete_stmt.compile().params}")
                     
-                    
-                    logging.info(f"Deleted rows: {result.rowcount}")
+                    logging.info(f"RETENTION_HOURS: {retention_hours}; Deleted rows: {result.rowcount}")
 
                     result = connection.execute(select_stmt)
                     rows_to_delete = result.fetchall()

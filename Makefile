@@ -19,11 +19,14 @@ run.mount:
 run:
 	docker run --rm -it $(IMAGE_REPO_ROOT)/$(PROJECT_NAME)-$(APP_NAME):$(APP_VER) /bin/bash
 
-mysql.up:
-	docker compose --profile mysql up -d
+up: 
+	docker compose --profile $(db) up -d
 
-mysql.down:
-	docker compose --profile mysql down
+down:
+	docker compose --profile $(db) down
 
-mysql.logs:
-	docker compose --profile mysql logs -f
+logs:
+	docker compose --profile $(db) logs -f
+
+ps:
+	docker compose --profile $(db) ps

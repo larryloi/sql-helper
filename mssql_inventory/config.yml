@@ -47,5 +47,5 @@ services:
     <<: *default
     NUM_PROCESSES: 1
     WAIT_TIME: [6,12]
-    RETENTION_HOURS: 48
+    RETENTION_HOURS: 3
     BATCH_SIZE: 500
