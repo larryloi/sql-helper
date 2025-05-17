@@ -1,10 +1,18 @@
 
 
-USE inventory
+USE [inventory]
 GO
 
 
-
+CREATE TABLE [INV].suppliers (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    type VARCHAR(255) NOT NULL,
+    created_at DATETIME NOT NULL,
+    updated_at DATETIME NOT NULL,
+    CONSTRAINT UQ_suppliers_name_type UNIQUE (name, type)
+)
+GO
 
 CREATE TABLE [INV].[orders](
 	[id] [bigint] IDENTITY(1,1) NOT NULL,

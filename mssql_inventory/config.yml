@@ -6,7 +6,13 @@ services:
     MAX_RETRIES: 3
     COMPLEX: NONE
     # Default value is JSON, can be overridden to NONE  
-    
+
+  supplier_creator:
+    <<: *default
+    WAIT_TIME: [300, 900]
+    TYPE: ["manufacturer", "wholesaler", "distributor", "retailer"]
+    NUM_PROCESSES: 1
+
   orders_creator:
     <<: *default
     NUM_PROCESSES: 4

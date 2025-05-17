@@ -9,9 +9,9 @@ services:
 
   supplier_creator:
     <<: *default
-    WAIT_TIME: [3600, 7200]
+    WAIT_TIME: [300, 900]
     # WAIT_TIME: [1, 3]
-    TYPE: ['music','vehicle']
+    TYPE: ['music','vehicle','manufacturer', 'wholesaler', 'distributor', 'retailer']
     NUM_PROCESSES: 1
     RETENTION_HOUR: 2160
 

@@ -1,6 +1,19 @@
 #version: '3.8'
 services:
 
+  mssql_suppliers_creator:
+    image: quay.io/larryloi/sql_helper-faker:0.7.2
+    build: .
+    profiles: ["mssql", "all"]
+    hostname: mssql-suppliers-creator
+    environment:
+      - TZ=Asia/Macau
+    volumes:
+      - ./common/:/app/common/
+      - ./mssql_inventory/config.yml:/app/config.yml
+      #- ./mssql_inventory/:/app/mysql_inventory/
+    command: ["python", "-u", "mssql_inventory/supplier_creator.py"]
+
   mssql_orders_creator:
     image: quay.io/larryloi/sql_helper-faker:0.7.2
     build: .

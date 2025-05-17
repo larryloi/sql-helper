@@ -11,7 +11,7 @@ import json
 from datetime import datetime
 import pytz
 import sqlalchemy
-from sqlalchemy import create_engine, Table, MetaData, select, func
+from sqlalchemy import create_engine, Table, MetaData, select, func 
 from sqlalchemy.sql import text
 from multiprocessing import Process
 
