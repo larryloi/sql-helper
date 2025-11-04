@@ -1,11 +1,11 @@
 FROM python:3.8-slim AS base
 
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends gcc g++ unixodbc-dev gnupg curl procps && \
-    curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
-    echo "deb [arch=amd64] https://packages.microsoft.com/debian/10/prod buster main" > /etc/apt/sources.list.d/mssql-release.list && \
+    apt-get install -y --no-install-recommends gcc g++ unixodbc-dev gnupg curl procps apt-transport-https && \
+    curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o /etc/apt/trusted.gpg.d/microsoft.gpg && \
+    echo "deb [arch=amd64,arm64,armhf] https://packages.microsoft.com/debian/12/prod bookworm main" > /etc/apt/sources.list.d/mssql-release.list && \
     apt-get update && \
-    ACCEPT_EULA=Y apt-get install -y --no-install-recommends msodbcsql17
+    ACCEPT_EULA=Y apt-get install -y --no-install-recommends msodbcsql18
 WORKDIR /app
 COPY ./requirements.txt /app
 RUN pip install --upgrade pip

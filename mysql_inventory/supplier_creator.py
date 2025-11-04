@@ -1,84 +1,134 @@
-import os
-import sys
 import random
-import time
-import yaml
-import pytz
+import sqlalchemy
 from datetime import datetime
-from faker import Faker
-from sqlalchemy import create_engine, Table, MetaData
-from multiprocessing import Process
-import mysql.connector
+from sqlalchemy import Table, MetaData, select
 import logging
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'common')))
-import my_logging 
+from base_creator import BaseCreator
 
-local_tz = pytz.timezone('Asia/Macau')
-fake = Faker()
 
-# Load configuration from YAML file
-with open('config.yml', 'r') as f:
-    config = yaml.safe_load(f)
-
-service_config = config['services']['supplier_creator']
-db_url = service_config['DATABASE_URL']
-wait_time = service_config['WAIT_TIME']
-supplier_types = service_config['TYPE']
-num_processes = service_config['NUM_PROCESSES']
-
-def generate_unique_supplier_name():
-    while True:
-        supplier_name = fake.company() + ' ' + fake.company_suffix()
-        try:
-            # Check if the supplier name already exists
-            select_stmt = "SELECT COUNT(*) FROM suppliers WHERE name = %s"
-            cursor.execute(select_stmt, (supplier_name,))
-            if cursor.fetchone()[0] == 0:
-                return supplier_name
-        except mysql.connector.Error:
-            continue
-
-def insert_supplier_data():
-    engine = create_engine(db_url)
-    metadata = MetaData()
-
-    table_name = 'suppliers'
-    suppliers = Table(table_name, metadata, autoload_with=engine)
-
-    while True:
-        wait_time_seconds = random.randint(wait_time[0], wait_time[1])
-
-        time.sleep(wait_time_seconds)
-
-        supplier_name = generate_unique_supplier_name()
-        supplier_type = random.choice(supplier_types)
-
-        try:
-            insert_stmt = "INSERT INTO suppliers (name, type, created_at, updated_at) VALUES (%s, %s,NOW(), NOW()) "
-            cursor.execute(insert_stmt, (supplier_name, supplier_type))
-            conn.commit()
+class SupplierCreator(BaseCreator):
+    """
+    Supplier creator that inherits from BaseCreator.
+    Handles supplier-specific data generation and insertion.
+    """
+    
+    def __init__(self):
+        """Initialize the SupplierCreator."""
+        super().__init__('supplier_creator')
+        self._load_supplier_config()
+        
+    def _load_supplier_config(self):
+        """Load supplier-specific configuration."""
+        self.supplier_types = self.service_config['TYPE']
+        
+    def get_table_name(self):
+        """Return the table name for suppliers."""
+        return 'suppliers'
+        
+    def generate_unique_supplier_name(self, connection):
+        """
+        Generate a unique supplier name that doesn't exist in the database.
+        
+        Args:
+            connection: Database connection object
             
-        except mysql.connector.Error:
-            continue
+        Returns:
+            str: Unique supplier name
+        """
+        metadata = MetaData()
+        suppliers_table = Table(self.get_table_name(), metadata, autoload_with=connection)
+        
+        max_attempts = 10
+        attempts = 0
+        
+        while attempts < max_attempts:
+            supplier_name = self.fake.company() + ' ' + self.fake.company_suffix()
+            
+            try:
+                # Check if the supplier name already exists
+                select_stmt = select(sqlalchemy.func.count()).select_from(suppliers_table).where(
+                    suppliers_table.c.name == supplier_name
+                )
+                result = connection.execute(select_stmt)
+                count = result.scalar()
+                
+                if count == 0:
+                    return supplier_name
+                    
+            except Exception as e:
+                logging.warning(f"Error checking supplier name uniqueness: {e}")
+                
+            attempts += 1
+            
+        # If we can't find a unique name after max attempts, use a UUID suffix
+        import uuid
+        return f"{self.fake.company()} {self.fake.company_suffix()} {str(uuid.uuid4())[:8]}"
+        
+    def generate_supplier_data(self, connection):
+        """
+        Generate data for a single supplier.
+        
+        Args:
+            connection: Database connection object
+            
+        Returns:
+            dict: Dictionary containing supplier data
+        """
+        supplier_name = self.generate_unique_supplier_name(connection)
+        supplier_type = random.choice(self.supplier_types)
+        
+        supplier_data = {
+            "name": supplier_name,
+            "type": supplier_type,
+            "created_at": datetime.now(self.local_tz),
+            "updated_at": datetime.now(self.local_tz)
+        }
+        
+        return supplier_data
+        
+    def insert_data(self):
+        """
+        Main data insertion loop for suppliers.
+        This method runs continuously and inserts supplier data.
+        """
+        engine = self.get_engine()
+        metadata = MetaData()
+        table_name = self.get_table_name()
+        suppliers_table = Table(table_name, metadata, autoload_with=engine)
+        
+        while True:
+            # Sleep for random time
+            self.sleep_random_time()
+            
+            try:
+                with engine.connect() as connection:
+                    # Generate supplier data
+                    supplier_data = self.generate_supplier_data(connection)
+                    
+                    # Create insert statement
+                    insert_stmt = suppliers_table.insert().values(supplier_data)
+                    
+                    # Execute insert
+                    result = connection.execute(insert_stmt)
+                    connection.commit()
+                    
+                    logging.info(f"Inserted supplier: {supplier_data['name']} (ID: {result.inserted_primary_key})")
+                    
+            except sqlalchemy.exc.IntegrityError as e:
+                logging.warning(f"Integrity error (likely duplicate): {e}")
+                continue
+                
+            except sqlalchemy.exc.DatabaseError as e:
+                logging.error(f"Database error: {e}")
+                continue
+                
+            except Exception as e:
+                logging.error(f"Unexpected error: {e}")
+                continue
+
 
 if __name__ == "__main__":
-
-    conn = mysql.connector.connect(
-        host=db_url.split('@')[1].split(':')[0],
-        user=db_url.split('://')[1].split(':')[0],
-        password=db_url.split('://')[1].split(':')[1].split('@')[0],
-        database=db_url.split('/')[3]
-    )
-    cursor = conn.cursor()
-
-    processes = []
-
-    for _ in range(num_processes):
-        p = Process(target=insert_supplier_data)
-        p.start()
-        logging.info(f"Process started with PID: {p.pid}")
-        processes.append(p)
-
-    for p in processes:
-        p.join()
+    """Main entry point for the supplier creator."""
+    creator = SupplierCreator()
+    creator.run()

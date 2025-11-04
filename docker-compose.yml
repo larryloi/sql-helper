@@ -1,116 +1,302 @@
-#version: '3.8'
-services:
 
+# Networks
+networks:
+  sql-helper:
+    name: sql-helper-network
+    driver: bridge
+
+# Volumes
+volumes:
+  logs:
+    name: sql-helper-logs
+
+services:
+  # ===================================
+  # MS SQL Server Services
+  # ===================================
+  
   mssql_suppliers_creator:
     image: quay.io/larryloi/sql_helper-faker:0.7.2
     build: .
     profiles: ["mssql", "all"]
+    container_name: mssql-suppliers-creator
     hostname: mssql-suppliers-creator
+    networks:
+      - sql-helper
     environment:
       - TZ=Asia/Macau
+      - PYTHONUNBUFFERED=1
+      - SERVICE_NAME=mssql_suppliers_creator
     volumes:
-      - ./common/:/app/common/
-      - ./mssql_inventory/config.yml:/app/config.yml
-      #- ./mssql_inventory/:/app/mysql_inventory/
+      - ./common/:/app/common/:ro
+      - ./mssql_inventory/config.yml:/app/config.yml:ro
+      - ./mssql_inventory/:/app/mssql_inventory/:ro
+      - logs:/var/log/sql-helper/
     command: ["python", "-u", "mssql_inventory/supplier_creator.py"]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -f supplier_creator.py || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   mssql_orders_creator:
     image: quay.io/larryloi/sql_helper-faker:0.7.2
     build: .
     profiles: ["mssql", "all"]
-    hostname: mssql-orders-creator01
+    container_name: mssql-orders-creator
+    hostname: mssql-orders-creator
+    networks:
+      - sql-helper
     environment:
       - TZ=Asia/Macau
+      - PYTHONUNBUFFERED=1
+      - SERVICE_NAME=mssql_orders_creator
     volumes:
-      - ./common/:/app/common/
-      - ./mssql_inventory/config.yml:/app/config.yml
-#      - ./mssql_inventory/:/app/mssql_inventory/
+      - ./common/:/app/common/:ro
+      - ./mssql_inventory/config.yml:/app/config.yml:ro
+      - ./mssql_inventory/:/app/mssql_inventory/:ro
+      - logs:/var/log/sql-helper/
     command: ["python", "-u", "mssql_inventory/orders_creator.py"]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -f orders_creator.py || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 
   mssql_orders_modifier:
     image: quay.io/larryloi/sql_helper-faker:0.7.2
     build: .
     profiles: ["mssql", "all"]
-    hostname: mssql-orders-modifier01
+    container_name: mssql-orders-modifier
+    hostname: mssql-orders-modifier
+    networks:
+      - sql-helper
     environment:
       - TZ=Asia/Macau
+      - PYTHONUNBUFFERED=1
+      - SERVICE_NAME=mssql_orders_modifier
     volumes:
-      - ./common/:/app/common/
-      - ./mssql_inventory/config.yml:/app/config.yml
-#      - ./mssql_inventory/:/app/mssql_inventory/
+      - ./common/:/app/common/:ro
+      - ./mssql_inventory/config.yml:/app/config.yml:ro
+      - ./mssql_inventory/:/app/mssql_inventory/:ro
+      - logs:/var/log/sql-helper/
     command: ["python", "-u", "mssql_inventory/orders_modifier.py"]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -f orders_modifier.py || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    depends_on:
+      - mssql_orders_creator
 
 
   mssql_orders_purger:
     image: quay.io/larryloi/sql_helper-faker:0.7.2
     build: .
     profiles: ["mssql", "all"]
-    hostname: mssql-orders-purger01
+    container_name: mssql-orders-purger
+    hostname: mssql-orders-purger
+    networks:
+      - sql-helper
     environment:
       - TZ=Asia/Macau
+      - PYTHONUNBUFFERED=1
+      - SERVICE_NAME=mssql_orders_purger
     volumes:
-      - ./common/:/app/common/
-      - ./mssql_inventory/config.yml:/app/config.yml
-#      - ./mssql_inventory/:/app/mssql_inventory/
+      - ./common/:/app/common/:ro
+      - ./mssql_inventory/config.yml:/app/config.yml:ro
+      - ./mssql_inventory/:/app/mssql_inventory/:ro
+      - logs:/var/log/sql-helper/
     command: ["python", "-u", "mssql_inventory/orders_purger.py"]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -f orders_purger.py || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    depends_on:
+      - mssql_orders_creator
 
 
 
 
 
+  # ===================================
+  # MySQL Services
+  # ===================================
+  
   mysql_suppliers_creator:
     image: quay.io/larryloi/sql_helper-faker:0.7.2
     build: .
     profiles: ["mysql", "all"]
+    container_name: mysql-suppliers-creator
     hostname: mysql-suppliers-creator
+    networks:
+      - sql-helper
     environment:
       - TZ=Asia/Macau
+      - PYTHONUNBUFFERED=1
+      - SERVICE_NAME=mysql_suppliers_creator
     volumes:
-      - ./common/:/app/common/
-      - ./mysql_inventory/config.yml:/app/config.yml
-      - ./mysql_inventory/:/app/mysql_inventory/
+      - ./common/:/app/common/:ro
+      - ./mysql_inventory/config.yml:/app/mysql_inventory/config.yml:ro
+      - ./mysql_inventory/:/app/mysql_inventory/:ro
+      - logs:/var/log/sql-helper/
     command: ["python", "-u", "mysql_inventory/supplier_creator.py"]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -f supplier_creator.py || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 
   mysql_orders_creator:
     image: quay.io/larryloi/sql_helper-faker:0.7.2
     build: .
     profiles: ["mysql", "all"]
+    container_name: mysql-orders-creator
     hostname: mysql-orders-creator
+    networks:
+      - sql-helper
     environment:
       - TZ=Asia/Macau
+      - PYTHONUNBUFFERED=1
+      - SERVICE_NAME=mysql_orders_creator
     volumes:
-      - ./mysql_inventory/config.yml:/app/mysql_inventory/config.yml
-#      - ./mysql_inventory/:/app/mysql_inventory/
-#      - ./common/:/app/common/
+      - ./common/:/app/common/:ro
+      - ./mysql_inventory/config.yml:/app/mysql_inventory/config.yml:ro
+      - ./mysql_inventory/:/app/mysql_inventory/:ro
+      - logs:/var/log/sql-helper/
     command: ["python", "-u", "/app/mysql_inventory/orders_creator.py"]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -f orders_creator.py || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   mysql_orders_modifier:
     image: quay.io/larryloi/sql_helper-faker:0.7.2
     build: .
     profiles: ["mysql", "all"]
+    container_name: mysql-orders-modifier
     hostname: mysql-orders-modifier
+    networks:
+      - sql-helper
     environment:
       - TZ=Asia/Macau
+      - PYTHONUNBUFFERED=1
+      - SERVICE_NAME=mysql_orders_modifier
     volumes:
-      - ./mysql_inventory/config.yml:/app/mysql_inventory/config.yml
-#       - ./mysql_inventory/:/app/mysql_inventory/
-#       - ./common/:/app/common/
-
+      - ./common/:/app/common/:ro
+      - ./mysql_inventory/config.yml:/app/mysql_inventory/config.yml:ro
+      - ./mysql_inventory/:/app/mysql_inventory/:ro
+      - logs:/var/log/sql-helper/
     command: ["python", "-u", "/app/mysql_inventory/orders_modifier.py"]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -f orders_modifier.py || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    depends_on:
+      - mysql_orders_creator
 
   mysql_orders_purger:
     image: quay.io/larryloi/sql_helper-faker:0.7.2
     build: .
     profiles: ["mysql", "all"]
+    container_name: mysql-orders-purger
     hostname: mysql-orders-purger
+    networks:
+      - sql-helper
     environment:
       - TZ=Asia/Macau
+      - PYTHONUNBUFFERED=1
+      - SERVICE_NAME=mysql_orders_purger
     volumes:
-      - ./mysql_inventory/config.yml:/app/mysql_inventory/config.yml
-#       - ./mysql_inventory/:/app/mysql_inventory/
-#       - ./common/:/app/common/
-
-
+      - ./common/:/app/common/:ro
+      - ./mysql_inventory/config.yml:/app/mysql_inventory/config.yml:ro
+      - ./mysql_inventory/:/app/mysql_inventory/:ro
+      - logs:/var/log/sql-helper/
     command: ["python", "-u", "/app/mysql_inventory/orders_purger.py"]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -f orders_purger.py || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    depends_on:
+      - mysql_orders_creator
+
+  # ===================================
+  # Utility Services (Optional)
+  # ===================================
+  
+  # Log viewer service (optional)
+  # logviewer:
+  #   image: amir20/dozzle:latest
+  #   profiles: ["monitoring"]
+  #   container_name: sql-helper-logviewer
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock:ro
+  #   ports:
+  #     - "8080:8080"
+  #   networks:
+  #     - sql-helper
+  #   environment:
+  #     DOZZLE_LEVEL: info
+  #     DOZZLE_TAILSIZE: 300
