@@ -3,35 +3,36 @@ import sys
 import random
 import time
 import uuid
-import yaml
+import os
+import random
+import time
+import uuid
+import logging
 from datetime import datetime
 import pytz
-import sqlalchemy
-from sqlalchemy import create_engine, Table, MetaData
-from sqlalchemy.sql import text
 from multiprocessing import Process
-import logging
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'common')))
-import my_logging 
+from db_handler import load_config, DBConnectionHandler
 
 local_tz = pytz.timezone('Asia/Macau')
 
-# Load configuration from YAML file
-with open('config.yml', 'r') as f:
-    config = yaml.safe_load(f)
+# Load configuration
+config = load_config()
+default_config = config['services']['default_config']
+service_config = config['services'].get('invoices_creator', {})
 
-service_config = config['services']['invoices_creator']
-
-wait_time = service_config['WAIT_TIME']
-class_ = service_config['CLASS']
-num_processes = service_config['NUM_PROCESSES']
-retention_hours = service_config['RETENTION_HOURS']
+wait_time = service_config.get('WAIT_TIME', [1, 3])
+class_ = service_config.get('CLASS', [])
+num_processes = service_config.get('NUM_PROCESSES', 1)
+retention_hours = service_config.get('RETENTION_HOURS', 24)
 
 def insert_data():
-    engine = create_engine(service_config['DATABASE_URL'])
-    metadata = MetaData()
-    invoices = Table('invoices', metadata, autoload_with=engine, schema='inventory.INV')
+    db_url = service_config.get('DATABASE_URL') or default_config.get('DATABASE_URL')
+    handler = DBConnectionHandler(db_url, timeout_seconds=default_config.get('TIMEOUT_SECONDS', 30), max_retries=default_config.get('MAX_RETRIES', 3))
+    engine = handler.get_engine()
+    metadata = __import__('sqlalchemy').MetaData()
+    schema = service_config.get('SCHEMA') or default_config.get('SCHEMA')
+    invoices = __import__('sqlalchemy').Table('invoices', metadata, autoload_with=engine, schema=schema)
 
     while True:
         wait_time_seconds = random.randint(wait_time[0], wait_time[1])
@@ -39,12 +40,11 @@ def insert_data():
 
         with engine.connect() as connection:
             try:
-                # Insert new invoice
                 insert_stmt = invoices.insert().values({
                     "invoice_id": str(uuid.uuid4()),
                     "customer_id": random.randint(1, 30),
                     "item_id": random.randint(1, 100),
-                    "class": random.choice(class_),
+                    "class": random.choice(class_) if class_ else None,
                     "qty": random.randint(1, 20) * 100,
                     "price": random.randint(1, 500) * 10,
                     "created_at": datetime.now(local_tz),
@@ -52,12 +52,11 @@ def insert_data():
                 })
                 connection.execute(insert_stmt)
 
-
-                delete_stmt = invoices.delete().where(text(f"DATEDIFF(hour, updated_at, GETDATE()) > {retention_hours}"))
+                delete_stmt = invoices.delete().where(__import__('sqlalchemy').text(f"DATEDIFF(hour, updated_at, GETDATE()) > {retention_hours}"))
                 connection.execute(delete_stmt)
-                #print (f"{delete_stmt}")
-            except sqlalchemy.exc.ProgrammingError:
+            except Exception:
                 continue
+
 
 if __name__ == "__main__":
     processes = []
@@ -70,4 +69,6 @@ if __name__ == "__main__":
 
     for p in processes:
         p.join()
+        p.join()
+
 

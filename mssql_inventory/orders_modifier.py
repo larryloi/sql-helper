@@ -5,35 +5,37 @@ import os
 import sys
 import random
 import time
-import uuid
 import yaml
 from datetime import datetime, timedelta
 import pytz
-import sqlalchemy
-from sqlalchemy import create_engine, Table, MetaData, update
-from sqlalchemy.sql import text, select
-from multiprocessing import Process
 import logging
+from sqlalchemy import Table, MetaData, select, update
+from multiprocessing import Process
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'common')))
-import my_logging 
+import my_logging
+
+from db_handler import load_config, DBConnectionHandler
 
 local_tz = pytz.timezone('Asia/Macau')
 
-# Load configuration from YAML file
-with open('config.yml', 'r') as f:
-    config = yaml.safe_load(f)
-
+# Load configuration
+config = load_config()
+default_config = config['services']['default_config']
 service_config = config['services']['orders_modifier']
+
 wait_time = service_config['WAIT_TIME']
 status = service_config['STATUS']
 num_processes = service_config['NUM_PROCESSES']
 rand_last_hours = service_config['RAND_LAST_HOURS']
 
 def modify_data():
-    engine = create_engine(service_config['DATABASE_URL'])
+    db_url = service_config.get('DATABASE_URL') or default_config.get('DATABASE_URL')
+    handler = DBConnectionHandler(db_url, timeout_seconds=default_config.get('TIMEOUT_SECONDS', 30), max_retries=default_config.get('MAX_RETRIES', 3))
+    engine = handler.get_engine()
     metadata = MetaData()
-    orders = Table('orders', metadata, autoload_with=engine, schema='inventory.INV')
+    schema = service_config.get('SCHEMA') or default_config.get('SCHEMA')
+    orders = Table('orders', metadata, autoload_with=engine, schema=schema)
 
     while True:
         wait_time_seconds = random.randint(wait_time[0], wait_time[1])
@@ -42,27 +44,22 @@ def modify_data():
         with engine.connect() as connection:
             try:
                 random_status = random.choices(list(status.keys()), weights=list(status.values()))[0]
-                # Randomly define a datetime within the last 3 hours
                 random_time = datetime.now(local_tz) - timedelta(hours=random.random() * rand_last_hours)
 
-                # Select the first record after the random time
                 select_stmt = select(orders).where(orders.c.created_at >= random_time).order_by(orders.c.id).limit(1)
-                #logging.info(f"{select_stmt.compile().string} with parameters {select_stmt.compile().params}")
                 result = connection.execute(select_stmt)
                 row = result.fetchone()
 
                 if row is not None:
-                    # Update the selected record
                     update_stmt = update(orders).where(orders.c.id == row['id']).values({
                         "status": random_status,
                         "updated_at": datetime.now(local_tz)
                     })
 
                     logging.info(f"Random time for modifier: {random_time}")
-                    logging.info(f"{update_stmt.compile().string} with parameters {update_stmt.compile().params}")
-                    
+                    logging.info(f"{update_stmt}")
                     connection.execute(update_stmt)
-            except sqlalchemy.exc.ProgrammingError:
+            except Exception:
                 continue
 
 
